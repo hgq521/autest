@@ -1,0 +1,259 @@
+import uiautomator2 as u2
+import time
+
+def start_app(pk_name):
+	d.app_stop(pk_name)
+	d.app_start(pk_name)
+
+
+
+#click hongbao
+#hongbao_btn = d(resourceId="com.ss.android.ugc.livelite:id/vr").child(className="android.widget.RelativeLayout")[1].info
+
+#签到
+def sign():
+	if (d(resourceId="com.xiangkan.android:id/tv_box_hint").wait(2.0)):
+		text = d(resourceId="com.xiangkan.android:id/tv_box_hint").get_text()
+		if (text == "已签"):
+			print(text)
+			return
+	sign_btn = d(resourceId="com.xiangkan.android:id/custom_sign_box")
+	sign_btn.click()
+
+def time_award():
+	if (d(resourceId="com.xiangkan.android:id/tv_box_time_new").wait(2.0)):
+		text = d(resourceId="com.xiangkan.android:id/tv_box_time_new").get_text()
+		print(text)
+		if (text != "领金币"):
+			return
+
+	d(resourceId="com.xiangkan.android:id/custom_integer_coin_box").click()
+
+
+
+#我的	
+def wode():
+	x,y = d(resourceId="com.xiangkan.android:id/tv_tab_title", text="我的").sibling(resourceId="com.xiangkan.android:id/tab_icon").center()
+	print(x)
+	print(y)
+	d.click(x,y)
+
+#阅读文章0.5分钟(圆圈转1圈
+def wenzhang():
+	ret = False
+
+	tv_text = "阅读文章 30 秒"
+	#tv_text = "阅读文章0.5分钟(圆圈转1圈)"
+	for x in range(1,3):
+		title_tv_res_id = "com.xiangkan.android:id/title_tv"
+		if (d(resourceId=title_tv_res_id, text=tv_text).wait(1.0)):
+			print("找到了")
+			stats_res_id = "com.xiangkan.android:id/status_fl"
+			stats_btn_res_id = "com.xiangkan.android:id/status_btn"
+			status = d(resourceId = title_tv_res_id, text=tv_text).sibling(resourceId=stats_res_id)
+
+			ret = True
+			for item in status:
+				status_btn = item.child(resourceId="stats_btn_res_id")
+
+				for tt in status_btn:
+					text = tt.get_text()
+					if text == "已完成":
+						print(text)
+						ret = False
+
+			break
+
+		print("%s %u" %(tv_text, x))
+		d.swipe_ext("up",0.3)
+	if not ret:
+		return
+
+	time.sleep(2.0)
+	x, y = d(resourceId="com.xiangkan.android:id/title_tv", text=tv_text).center()
+	d.click(x,y)
+
+	for i in range(1,20):
+		each_wenzhang();
+		time.sleep(1.0)
+
+		d.swipe_ext("up",0.5)
+		time.sleep(4.0)
+
+def each_wenzhang():
+	infos = d(resourceId="com.xiangkan.android:id/common_recycler_view").child(resourceId="com.xiangkan.android:id/tvInfo")
+	#print(infos.info)
+	for item in infos:
+		print("tt")
+		text = item.get_text()
+		
+		print(text)
+		if (text.find("广告") != -1):
+			print("sssst")
+			continue
+		#elif (text.find("")):
+		#	continue
+		time.sleep(1.0)
+		tvtitle = item.sibling(resourceId="com.xiangkan.android:id/tvTitle")
+		x,y = tvtitle.center()
+		print("x,y %u %u" %(x,y))
+		d.click(x, y)
+		onewenzhang()
+
+def onewenzhang():
+	#if d(resourceId="com.xiangkan.android:id/bubble_text").wait(1.0):
+	#	text = d(resourceId="com.xiangkan.android:id/bubble_text").get_text()
+	#	print(text)
+	#	if text == "本篇奖励已达上限":
+	#		print("back")
+	#		d.press("back")
+	#		return
+
+	print("onewenzhang2")
+	if not (d(resourceId="com.xiangkan.android:id/ringProgressBar").wait(2.0)):
+		print("meiyoujiangli")
+		#d.press("back")
+		toshouye()
+		return
+	
+	if check_no_award():
+		toshouye()
+		return
+	cur = time.time()
+	print("onewenzhang3")
+	for x in range(1,20):
+		d.swipe_ext("down",0.2)
+		d.swipe_ext("up",0.2)
+		time.sleep(5.0)
+		dur = time.time()-cur
+		if dur > 95.0:
+			print("dur is %f"%(dur))	
+			break
+		
+		#if check_no_award():
+		#	break
+		#print(d(resourceId="com.xiangkan.android:id/ringProgressBar").info)
+
+	fudai()	
+	#if d.watcher("AUTO_FC_WHEN_ANR").triggered:
+	#	print("treed")
+	
+	#d.press("back")
+	toshouye()
+def check_no_award():
+	cion = d(resourceId="com.xiangkan.android:id/coin_bubble_layout").child(className="android.widget.TextView")
+	for item in cion:
+		if item.get_text() == "本篇奖励已达上限":
+			return True
+			print("no award")
+	
+	return False
+
+def toshouye():
+	#d.watcher("AUTO_FC_WHEN_ANR").remove()
+	for i in range(1,3):
+		d.press("back");
+		if d(resourceId="com.xiangkan.android:id/tv_tab_title", text="首页").wait(1.0):
+			print("shouye")
+			break
+	
+def fudai():
+	if not d(resourceId="com.xiangkan.android:id/fudai_icon").exists():
+		return
+
+	print("开福袋")
+	x, y = d(resourceId="com.xiangkan.android:id/fudai_icon").center()
+	d.click(x, y)
+		
+#观看视频1分钟
+def shipin():
+	ret = False
+	d.swipe_ext("down",0.9)
+	tv_text = "观看视频 1 分钟"
+	#tv_text = "观看视频1分钟(圆圈转1圈)"
+	for x in range(1,3):
+		if d(resourceId="com.xiangkan.android:id/title_tv", text=tv_text).wait(1.0):
+			print("shipin")
+			ret = True
+			break
+
+		print("找不到 %s"%(tv_text))
+		d.swipe_ext("up",0.3)
+
+	if not ret:
+		return
+	time.sleep(1.0)
+	x, y = d(resourceId="com.xiangkan.android:id/title_tv", text=tv_text).center()
+	d.click(x,y)
+
+	for i in range(1,5):
+		each_shipin();
+		time.sleep(1.0)
+		d.swipe_ext("up",0.5)
+		time.sleep(4.0)
+
+def each_shipin():
+	infos = d(resourceId="com.xiangkan.android:id/common_recycler_view").child(resourceId="com.xiangkan.android:id/video_layout")
+
+	for item in infos:
+		print("xx")
+		x, y = item.center()
+		d.click(x, y)
+
+		oneshipin()
+
+def oneshipin():
+	if not (d(resourceId="com.xiangkan.android:id/ringProgressBar").wait(2.0)):
+		print("wujiangli")
+		toshiping()
+		return
+	dur_sec = t2s(d(resourceId="com.xiangkan.android:id/video_item_duration").get_text())
+	last_sec = 0
+	for x in range(1,20):
+		play_sec = t2s(d(resourceId="com.xiangkan.android:id/player_time").get_text())
+
+		if last_sec == play_sec:
+			d(resourceId="com.xiangkan.android:id/video_item_play_btn").click()
+		last_sec = play_sec
+		if (dur_sec < 185):
+			if dur_sec - play_sec < 10:
+				print("a dur %u, play %u 退出" % (dur_sec, play_sec))	
+				break
+		else:
+			if play_sec >= 182:
+				print("b dur %u, play %u 退出" % (dur_sec, play_sec))	
+				break
+		print("dur %u, play %u" % (dur_sec, play_sec))	
+		time.sleep(10.0)
+	
+	toshiping()
+
+def toshiping():
+	toshouye()
+		
+#围观
+def weiguan():
+	x, y = d(resourceId="com.xiangkan.android:id/title_tv", text="在围观内观看小视频5分钟").center()
+	d.click(x,y)
+
+
+
+def t2s(t):
+	m="0"
+	s="0"
+	m,s = t.strip().split(":")
+	if m=="":
+		m="0"
+	if s=="":
+		s="0"
+	return int(m)*60 + int(s)
+
+
+if __name__ == '__main__':
+	d = u2.connect('66J5T19603005713')
+	start_app("com.xiangkan.android")
+	sign()
+	time_award()
+	wode()
+	wenzhang()
+	#shipin()
