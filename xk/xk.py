@@ -248,6 +248,307 @@ def t2s(t):
 		s="0"
 	return int(m)*60 + int(s)
 
+class xk:
+	
+	fudai_interval = 0,5,10,30,60,90
+	def __init__(self,d, name):
+		self.name = name
+		self.d = d
+		self.last_time = 0
+		self.last_coin = 0
+		self.signed = False
+		self.wenzhang_over = False
+		self.shipin_over = False
+		self.fudai_time = 0
+		self.fudai_count = 0
+
+
+		pass
+	@classmethod
+	def get_fudai_interval(xk, count):
+		if count < len(xk.fudai_count):
+			return xk.fudai_count[count]
+
+		return 10000
+	def save(self):
+		pass
+
+	def check_time(self):
+		if time.time() - self.last_time > 600:
+			return True
+		return False
+	
+	def set_time(self):
+		self.last_time = time.time()
+
+	def run(self):
+		self.set_time()
+
+		if not self.start_app():
+			return False
+		if not self.sign():
+			return False
+		if not self.time_award():
+			return False
+		if not self.wenzhang():
+			return False
+		if not self.shipin():
+			return False
+		return True
+	
+	def start_app(self):
+		self.d.app_stop(self.name)
+		self.d.app_start(self.name)
+		return True
+
+	def sign(self):
+		if self.signed:
+			return True
+
+		d = self.d
+		if (d(resourceId="com.xiangkan.android:id/tv_box_hint").wait(2.0)):
+			text = d(resourceId="com.xiangkan.android:id/tv_box_hint").get_text()
+			if (text == "已签"):
+				print(text)
+				return True
+		sign_btn = d(resourceId="com.xiangkan.android:id/custom_sign_box")
+		sign_btn.click()
+		self.signed = True
+		self.save()
+		return True
+	
+	def time_award(self):
+		sec = time.time()
+		d = self.d
+		if sec - self.last_coin < 3600:
+			return True
+		
+		if (d(resourceId="com.xiangkan.android:id/tv_box_time_new").wait(2.0)):
+			text = d(resourceId="com.xiangkan.android:id/tv_box_time_new").get_text()
+			print("time_award:",text)
+			if (text != "领金币"):
+				return True
+
+		d(resourceId="com.xiangkan.android:id/custom_integer_coin_box").click()
+		self.last_coin = sec
+		self.save()
+		return True
+
+
+	def wenzhang(self):
+
+		d = self.d
+
+		x,y = d(resourceId="com.xiangkan.android:id/tv_tab_title",
+		text="我的").sibling(resourceId="com.xiangkan.android:id/tab_icon").center()
+
+		d.click(x,y)
+
+		if (self.wenzhang_over):
+			return True
+
+		#wenzhang
+		ret = False
+		tv_text = "阅读文章 30 秒"
+		#tv_text = "阅读文章0.5分钟(圆圈转1圈)"
+
+		for x in range(1,3):
+			title_tv_res_id = "com.xiangkan.android:id/title_tv"
+			if (d(resourceId=title_tv_res_id, text=tv_text).wait(1.0)):
+				stats_res_id = "com.xiangkan.android:id/status_fl"
+				stats_btn_res_id = "com.xiangkan.android:id/status_btn"
+				if d(resourceId = title_tv_res_id, text=tv_text).sibling(resourceId=stats_res_id)[0].wait(1.0):
+					if d(resourceId = title_tv_res_id, text=tv_text).sibling(resourceId=stats_res_id)\
+					[0].child(resourceId="stats_btn_res_id")[0].wait(2.0):
+						print("ttt")
+					else:
+						print("hhh")
+				else:
+					print("xxxasdfa")
+				ret = True
+				#for item in status:
+				#	status_btn = item.child(resourceId="stats_btn_res_id")
+
+				#	for tt in status_btn:
+				#		text = tt.get_text()
+				#		print("txxxx:",text)
+				#		if text == "已完成":
+				#			print("已完成")
+				#			ret = False
+
+				break
+			print("not found")
+
+			d.swipe_ext("up",0.3)
+
+
+		if not ret:
+			self.wenzhang_over = True
+			self.save()
+			return True
+
+		time.sleep(2.0)
+		x, y = d(resourceId="com.xiangkan.android:id/title_tv", text=tv_text).center()
+		d.click(x,y)
+
+		for i in range(1,20):
+			self.each_wenzhang();
+			time.sleep(1.0)
+
+			d.swipe_ext("up",0.5)
+			time.sleep(4.0)
+			if (self.check_time()):
+				return False
+
+	def each_wenzhang(self):
+		d = self.d
+		infos = d(resourceId="com.xiangkan.android:id/common_recycler_view").child(resourceId="com.xiangkan.android:id/tvInfo")
+		for item in infos:
+			text = item.get_text()
+		
+			print(text)
+			if (text.find("广告") != -1):
+				continue
+			time.sleep(1.0)
+			tvtitle = item.sibling(resourceId="com.xiangkan.android:id/tvTitle")
+			x,y = tvtitle.center()
+			d.click(x, y)
+			self.onewenzhang()
+
+	def onewenzhang(self):
+		d = self.d
+		if not (d(resourceId="com.xiangkan.android:id/ringProgressBar").wait(2.0)):
+			self.toshouye()
+			return
+
+		if self.check_no_award():
+			self.toshouye()
+			return
+
+		cur = time.time()
+		for x in range(1,20):
+			d.swipe_ext("down",0.2)
+			d.swipe_ext("up",0.2)
+			time.sleep(5.0)
+			dur = time.time()-cur
+			if dur > 95.0:
+				print("dur is %f"%(dur))	
+				break
+		
+		self.fudai()	
+		self.toshouye()
+
+	def toshouye(self):
+		d = self.d
+		for i in range(1,3):
+			d.press("back");
+			if d(resourceId="com.xiangkan.android:id/tv_tab_title", text="首页").wait(1.0):
+				print("shouye")
+				break
+
+	def fudai(self):
+		if self.fudai_count >= xk.get_fudai_max():
+			return
+		interval = xk.get_fudai_interval(self.fudai_count)
+		if interval == 10000:
+			return
+			
+		if not (time.time() - self.fudai_time > interval*60):
+			return
+		#时间检测	
+		d = self.d
+		if not d(resourceId="com.xiangkan.android:id/fudai_icon").exists():
+			return
+
+		x, y = d(resourceId="com.xiangkan.android:id/fudai_icon").center()
+		d.click(x, y)
+		if self.fudai_count == 0:
+			self.fudai_time = time.time()
+		self.fudai_count += 1
+		self.save()
+
+	def check_no_award(self):
+		d = self.d
+		cion = d(resourceId="com.xiangkan.android:id/coin_bubble_layout").child(className="android.widget.TextView")
+		for item in cion:
+			if item.get_text() == "本篇奖励已达上限":
+				return True
+	
+		return False
+
+	def shipin(self):
+		ret = False
+		if self.shipin_over:
+			return True
+		d = self.d
+		d.swipe_ext("down",0.9)
+		tv_text = "观看视频 1 分钟"
+		#tv_text = "观看视频1分钟(圆圈转1圈)"
+		for x in range(1,3):
+			if d(resourceId="com.xiangkan.android:id/title_tv", text=tv_text).wait(1.0):
+				print("shipin")
+				ret = True
+				break
+
+			print("找不到 %s"%(tv_text))
+			d.swipe_ext("up",0.3)
+
+		if not ret:
+			self.shipin_over = True
+			self.save()
+			return True
+		time.sleep(1.0)
+		x, y = d(resourceId="com.xiangkan.android:id/title_tv", text=tv_text).center()
+		d.click(x,y)
+
+		for i in range(1,5):
+			self.each_shipin();
+			time.sleep(1.0)
+			d.swipe_ext("up",0.5)
+			time.sleep(4.0)
+			if self.check_time():
+				return False
+	
+	def each_shipin(self):
+		d = self.d	
+		infos = d(resourceId="com.xiangkan.android:id/common_recycler_view").child(resourceId="com.xiangkan.android:id/video_layout")
+
+		for item in infos:
+			print("xx")
+			x, y = item.center()
+			d.click(x, y)
+
+			self.oneshipin()
+
+	def oneshipin(self):
+		d = self.d
+		if not (d(resourceId="com.xiangkan.android:id/ringProgressBar").wait(2.0)):
+			self.toshiping()
+			return
+		dur_sec = t2s(d(resourceId="com.xiangkan.android:id/video_item_duration").get_text())
+		last_sec = 0
+		for x in range(1,20):
+			play_sec = t2s(d(resourceId="com.xiangkan.android:id/player_time").get_text())
+
+			if last_sec == play_sec:
+				d(resourceId="com.xiangkan.android:id/video_item_play_btn").click()
+			last_sec = play_sec
+			if (dur_sec < 185):
+				if dur_sec - play_sec < 10:
+					print("a dur %u, play %u 退出" % (dur_sec, play_sec))	
+					break
+			else:
+				if play_sec >= 182:
+					print("b dur %u, play %u 退出" % (dur_sec, play_sec))	
+					break
+			print("dur %u, play %u" % (dur_sec, play_sec))	
+			time.sleep(10.0)
+	
+		self.toshiping()
+	
+	def toshiping(self):
+		self.toshouye()
+
 
 if __name__ == '__main__':
 	d = u2.connect('66J5T19603005713')
