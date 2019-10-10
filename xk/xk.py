@@ -1,4 +1,7 @@
 import uiautomator2 as u2
+from uiautomator2.exceptions import (UiObjectNotFoundError,
+									 UiautomatorQuitError)
+
 import time
 
 def start_app(pk_name):
@@ -257,7 +260,7 @@ class xk:
 		self.last_time = 0
 		self.last_coin = 0
 		self.signed = False
-		self.wenzhang_over = False
+		self.wenzhang_over = True
 		self.shipin_over = False
 		self.fudai_time = 0
 		self.fudai_count = 0
@@ -328,7 +331,12 @@ class xk:
 			return True
 		
 		if (d(resourceId="com.xiangkan.android:id/tv_box_time_new").wait(2.0)):
-			text = d(resourceId="com.xiangkan.android:id/tv_box_time_new").get_text()
+			try:
+				text = d(resourceId="com.xiangkan.android:id/tv_box_time_new").get_text()
+			except UiObjectNotFoundError:
+				print("time_award: UiObjectNotFoundError")
+				return True
+
 			print("time_award:",text)
 			if (text != "领金币"):
 				return True
@@ -422,7 +430,12 @@ class xk:
 				continue
 			time.sleep(1.0)
 			tvtitle = item.sibling(resourceId="com.xiangkan.android:id/tvTitle")
-			x,y = tvtitle.center()
+			try:
+				x,y = tvtitle.center()
+			except UiObjectNotFoundError:
+				print("tvTitle not found")
+				continue
+
 			d.click(x, y)
 			self.onewenzhang()
 
@@ -526,42 +539,29 @@ class xk:
 
 		for item in infos:
 			print("xx")
-			x, y = item.center()
-			d.click(x, y)
+			try:
+				x, y = item.center()
+				d.click(x, y)
+			except UiObjectNotFoundError:
+				print("uiautomator2.exceptions.UiObjectNotFoundError")
+				continue
 
 			self.oneshipin()
 
 	def oneshipin(self):
+		now_sec = time.time()
 		d = self.d
 		if not (d(resourceId="com.xiangkan.android:id/ringProgressBar").wait(2.0)):
 			self.toshiping()
 			return
 		dur_sec = t2s(d(resourceId="com.xiangkan.android:id/video_item_duration").get_text())
-		last_sec = 0
+		d.watcher("restart").when(resourceId="com.xiangkan.android:id/player_compete_restart").click()
 		for x in range(1,20):
-			try:
-				play_sec = t2s(d(resourceId="com.xiangkan.android:id/player_time").get_text())
-			except UiObjectNotFoundError:
-				print("player_time not found")
-				continue
-				pass
-				
-
-
-			if last_sec == play_sec:
-				d(resourceId="com.xiangkan.android:id/video_item_play_btn").click()
-			last_sec = play_sec
-			if (dur_sec < 185):
-				if dur_sec - play_sec < 10:
-					print("a dur %u, play %u 退出" % (dur_sec, play_sec))	
-					break
-			else:
-				if play_sec >= 182:
-					print("b dur %u, play %u 退出" % (dur_sec, play_sec))	
-					break
-			print("dur %u, play %u" % (dur_sec, play_sec))	
+			if time.time() - now_sec > 1800:	
+				break
 			time.sleep(10.0)
 	
+		d.watcher.remove("restart")
 		self.toshiping()
 	
 	def toshiping(self):
