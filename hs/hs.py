@@ -299,7 +299,9 @@ class hs:
 		ret = False
 		for item in d(className="android.app.Dialog").child(text=coin_100):
 			print("100 %s" %(item.get_text()))
-			item.click()
+			x,y = item.center()
+			d.click(x, y)
+			#item.click()
 			ret = True
 			pass
 		if not ret:
@@ -434,7 +436,7 @@ class hs:
 		#if text.find("累积观看视频") == -1 :
 		#	return True
 		tt.click()		
-
+		last_sec = time.time()
 		while not self.check_time():
 
 			#if self.check_sp_over():
@@ -454,6 +456,29 @@ class hs:
 				continue
 
 			#免费领取
+			if d(resourceId="com.ss.android.ugc.livelite:id/a0c").wait(2.0):
+				get_btn = d(resourceId="com.ss.android.ugc.livelite:id/a0d")
+				if "点击领取" == get_btn.get_text():
+					x, y = get_btn.center()
+					d.swipe_ext('up', 0.3)
+					d.swipe_ext('down', 0.3)
+					d.click(x, y)
+					d.swipe_ext('up', 0.3)
+					last_sec = time.time()
+					print("免费领取")
+					continue
+				else:
+					if (time.time() - last_sec > 50):
+						print("免费领取超时")
+						last_sec = time.time()
+						d.swipe_ext('up', 0.3)
+						continue
+
+					print("免费领取等待...")
+					time.sleep(10.0)
+					continue
+
+			'''
 			if d.xpath('//*[@resource-id="com.ss.android.ugc.livelite:id/a2"]/android.widget.FrameLayout[1]').wait(2.0):
 			
 				child = d(resourceId="com.ss.android.ugc.livelite:id/a0k").child(resourceId="com.ss.android.ugc.livelite:id/l8")
@@ -469,11 +494,15 @@ class hs:
 					d.swipe_ext("up",0.3)
 					print("免费领取")
 					continue
-					
+			'''		
 				 
 
-
-			time.sleep(15.0)
+			now_sec = time.time()
+			diff_sec = now_sec - last_sec
+			if diff_sec > 15:
+				last_sec = now_sec
+			else:
+				time.sleep(diff_sec - 15)
 			d.swipe_ext("up", 0.3)
 			print("普通视频")
 
