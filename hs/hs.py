@@ -424,8 +424,8 @@ class hs:
 		#x, y = d(resourceId="com.ss.android.ugc.livelite:id/y9")[0].center()
 		#d.click(x,y)
 
-		tt = d.xpath('//*[@resource-id="app"]/android.view.View[6]')
-		text = ""
+		#tt = d.xpath('//*[@resource-id="app"]/android.view.View[6]')
+		#text = ""
 		#if tt.child(className="android.view.View")[0].wait(1.0):
 		#	text = tt.child(className="android.view.View")[0].get_text()
 		#else:
@@ -435,7 +435,44 @@ class hs:
 
 		#if text.find("累积观看视频") == -1 :
 		#	return True
-		tt.click()		
+		#tt.click()		
+		
+		ret = False
+		for item in d(resourceId="app").child(className="android.widget.Image"):
+			sli_tmp = {}
+			count = 0
+			for sli in item.sibling(className="android.view.View"):
+				text = sli.get_text()
+				print("search 累计观看",text)
+				print(count)
+				if count == 0:
+					if (text.find("累积观看视频") != -1):
+						ret = True
+						count += 1
+						sli_tmp = sli
+						continue
+					else:
+						break
+				elif count == 1:
+					count += 1
+					continue
+				elif count == 2:
+					print("tttt")
+					if (text == "已完成"):
+						ret = False
+					break
+
+			if ret:
+				print("click")
+				x, y = sli_tmp.center()
+				d.click(x, y)
+				break
+
+		
+		if not ret:
+			self.kan_sp_over = True
+			self.save()
+			return True
 		last_sec = time.time()
 		while not self.check_time():
 
