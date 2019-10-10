@@ -561,7 +561,7 @@ class xk:
 				break
 			time.sleep(10.0)
 	
-		d.watcher.remove("restart")
+		d.watchers.remove("restart")
 		self.toshiping()
 	
 	def toshiping(self):
