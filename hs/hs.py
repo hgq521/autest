@@ -1,4 +1,6 @@
 import uiautomator2 as u2
+from uiautomator2.exceptions import (UiObjectNotFoundError,
+									 UiautomatorQuitError)
 import time
 
 def hailianshipin():
@@ -25,6 +27,7 @@ def hailianshipin():
 
 	#if (d(className="android.widget.RelativeLayout",resourceId="com.ss.android.ugc.livelite:id/rl").wait(1.0)):
 	#	d(className="android.widget.RelativeLayout",resourceId="com.ss.android.ugc.livelite:id/rl").click()
+	#d(resourceId="com.ss.android.ugc.livelite:id/r_")
 	if d.watchers.triggered:
 		print("triggered")
 
@@ -200,11 +203,293 @@ def kan_sp():
 
 		#com.ss.android.ugc.livelite:id/a1s  zhuan
 
+class hs:
+	
+	def __init__(self, d, name):
+		self.name = name
+		self.d = d
+		self.signed = False
+		self.last_time = 0
+		self.last_lb_time = 0
+		self.hlsp_over = False
+		self.kan_sp_over = False
+
+	def save(self):
+		pass
+
+	def check_time(self):
+		if time.time() - self.last_time > 600:
+			return True
+		return False
+
+	def set_time(self):
+		self.last_time = time.time()
+
+
+	def run(self):
+		self.set_time()
+		print("set_time")
+		if not self.start_app():
+			return False
+
+
+		#if not self.sign():
+		#	print("sign return false")
+		#	return False
+
+		if not self.hongbao():
+			return False
+
+		print("hlsp")
+		if not self.kan_hlsp():
+			print("hlsp return false")
+			return False
+
+		if not self.kan_sp():
+			return False
+
+		return True
+
+	def start_app(self):
+		print("start_app")
+		self.d.app_stop(self.name)
+		self.d.app_start(self.name)
+		return True
+
+	def hongbao(self):
+		d = self.d
+		d(text="红包", resourceId="com.ss.android.ugc.livelite:id/title").click()
+
+		time.sleep(1.0)
+		#时间检测
+		now_time = time.time()
+		if (now_time - self.last_lb_time < 1800):
+			return True
+		
+		if d(text="开宝箱得金币").wait(2.0):
+			d(text="开宝箱得金币").click()
+			self.lb()
+
+		#if (d(resourceId="com.ss.android.ugc.livelite:id/lb").wait(10.0)):
+		#	lb_str = d(resourceId="com.ss.android.ugc.livelite:id/lb").get_text()
+		else:
+			print("未找到红包ui")
+			return True
+	
+		#if (lb_str=="宝箱"):
+		#	print("kaibaox")
+		#	self.lb()
+
+		return True
+
+	def lb(self):
+		d = self.d
+
+		#d(resourceId="com.ss.android.ugc.livelite:id/lb").click()
+		#d(text="开宝箱得金币").click()
+		coin_100 = "看视频 领100金币"
+		coin_double = '看视频 领双倍金币'
+	
+		time.sleep(1.0)
+		if not d(className="android.app.Dialog").wait(3.0):
+			print("dialog not exists ")
+
+			return
+		
+		ret = False
+		for item in d(className="android.app.Dialog").child(text=coin_100):
+			print("100 %s" %(item.get_text()))
+			item.click()
+			ret = True
+			pass
+		if not ret:
+			for item in d(className="android.app.Dialog").child(text=coin_double):
+				print("double %s" %(item.get_text()))
+				item.click()
+				ret = True
+
+
+		if not ret:
+			print("开宝箱,未处理的情况")
+			return
+
+
+		self.last_lb_time = time.time()
+		self.save()
+
+		if (d(text="关闭广告").wait(60.0)):
+			print("guanbiguangg")
+			d(text="关闭广告").click()
+		else:
+			print("开宝箱看视频 超时")
+			d.press("back")
+			pass
+
+	def sign(self):
+		print("sign")
+		if self.signed:
+			return True
+		
+		d = self.d
+		ret = False
+		count = 0
+		for item in d(resourceId="app").child(className="android.view.View",clickable=True):
+			count = count+1
+			if (count >5):
+				return False
+			if item.child(className="android.view.View").count > 0:
+				text = item.child(className="android.view.View")[0].get_text()
+				print(text)
+				if text == "签到":
+					item.click()
+					ret = True
+					break
+
+		if not ret:
+			return True
+		time.sleep(1.0)
+		d(text="javascript:;").click()
+		self.signed = True
+		self.save()
+
+		return True
+
+	def kan_hlsp(self):
+		print("kan_hlsp 0")
+		if self.hlsp_over:
+			return True
+		if self.check_time():
+			print("kan_hlsp 1")
+			return False
+
+		print("kan_hlsp 2")
+		d = self.d
+		ret = False
+		d.watcher("quit_con").when(resourceId="com.ss.android.ugc.livelite:id/rl").click()
+		while True:
+			if not self.hailianshipin():
+				self.hlsp_over = True
+				self.save()
+				ret = True
+				break
+			time.sleep(1.0)
+			if self.check_time():
+				print("kan_hlsp 3")
+				break
+
+		d.watchers.remove("quit_con")
+
+		return ret
+
+	def hailianshipin(self):
+		
+		d = self.d
+		ret = False
+		count = 0
+		for item in d(resourceId="app").child(className="android.view.View",clickable=True):
+			count = count+1
+			if (count >10):
+				return False
+			if item.child(className="android.view.View").count > 0:
+				if item.child(className="android.view.View")[0].get_text() == "看视频赚海量金币":
+					item.click()
+					break
+
+		if (d(text="关闭广告").wait(60.0)):
+			print("guanbiguangg")
+			d(text="关闭广告").click()
+			time.sleep(1.0)
+		else:
+			print("超时")
+			d.press("back")
+
+		if d(resourceId="com.ss.android.ugc.livelite:id/r_").wait(1.0):
+			d(resourceId="com.ss.android.ugc.livelite:id/r_").click()
+
+		if d.watchers.triggered:
+			print("triggered")
+
+	
+		return True
+		
+	def kan_sp(self):
+		print("kan_sp")
+		if self.kan_sp_over:
+			return True
+		
+		d = self.d
+		#d(text="视频", resourceId="com.ss.android.ugc.livelite:id/title").click()
+		#x, y = d(resourceId="com.ss.android.ugc.livelite:id/y9")[0].center()
+		#d.click(x,y)
+
+		tt = d.xpath('//*[@resource-id="app"]/android.view.View[6]')
+		text = ""
+		#if tt.child(className="android.view.View")[0].wait(1.0):
+		#	text = tt.child(className="android.view.View")[0].get_text()
+		#else:
+		#	self.kan_sp_over = True
+		#	self.save()
+		#	return True
+
+		#if text.find("累积观看视频") == -1 :
+		#	return True
+		tt.click()		
+
+		while not self.check_time():
+
+			#if self.check_sp_over():
+			#	self.kan_sp_over = True
+			#	self.save()
+			#	break
+			#抽奖
+			if d.xpath('//*[@resource-id="com.ss.android.ugc.livelite:id/a2"]/android.widget.RelativeLayout[1]').wait(2.0):
+				#todo	
+				item = d.xpath('//*[@resource-id="com.ss.android.ugc.livelite:id/a2"]/android.widget.RelativeLayout[1]')
+				x,y = item.center()
+				d.click(x, y)
+			
+				time.sleep(6.0)
+				d.swipe_ext("up", 0.5)
+				print("抽奖")
+				continue
+
+			#免费领取
+			if d.xpath('//*[@resource-id="com.ss.android.ugc.livelite:id/a2"]/android.widget.FrameLayout[1]').wait(2.0):
+			
+				child = d(resourceId="com.ss.android.ugc.livelite:id/a0k").child(resourceId="com.ss.android.ugc.livelite:id/l8")
+				for item in child:
+					time.sleep(10.0)
+					d.swipe_ext("up",0.3)
+					d.swipe_ext("down",0.3)
+					time.sleep(5.0)
+					item.click()
+					time.sleep(1.0)
+
+					tt.click()
+					d.swipe_ext("up",0.3)
+					print("免费领取")
+					continue
+					
+				 
+
+
+			time.sleep(15.0)
+			d.swipe_ext("up", 0.3)
+			print("普通视频")
+
+		return self.kan_sp_over
+
+
 
 if __name__ == '__main__':
 	d = u2.connect('66J5T19603005713')
-	start_app("com.ss.android.ugc.livelite")
-	hongbao()
-	sign()
+	#start_app("com.ss.android.ugc.livelite")
+	#hongbao()
+	#sign()
 	#kan_hlsp()
-	kan_sp()
+	#kan_sp()
+	tt = hs(d, "com.ss.android.ugc.livelite")
+	print("xxx")
+	tt.run()
+
+		
