@@ -406,7 +406,14 @@ class xk:
 
 	def each_wenzhang(self):
 		d = self.d
-		infos = d(resourceId="com.xiangkan.android:id/common_recycler_view").child(resourceId="com.xiangkan.android:id/tvInfo")
+		try:
+			infos = d(resourceId="com.xiangkan.android:id/common_recycler_view").child(resourceId="com.xiangkan.android:id/tvInfo")
+		except UiObjectNotFoundError:
+			self.toshouye()
+			print("tiaoquguangaole")
+			return
+			pass
+
 		for item in infos:
 			text = item.get_text()
 		
@@ -535,7 +542,7 @@ class xk:
 			try:
 				play_sec = t2s(d(resourceId="com.xiangkan.android:id/player_time").get_text())
 			except UiObjectNotFoundError:
-				print("player_time not found"
+				print("player_time not found")
 				continue
 				pass
 				
