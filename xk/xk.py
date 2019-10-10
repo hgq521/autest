@@ -266,10 +266,14 @@ class xk:
 		pass
 	@classmethod
 	def get_fudai_interval(xk, count):
-		if count < len(xk.fudai_count):
-			return xk.fudai_count[count]
-
+		if count < len(xk.fudai_interval):
+			return xk.fudai_interval[count]
 		return 10000
+
+	@classmethod
+	def get_fudai_max(xk):
+		return len(xk.fudai_interval)	
+
 	def save(self):
 		pass
 
@@ -528,7 +532,14 @@ class xk:
 		dur_sec = t2s(d(resourceId="com.xiangkan.android:id/video_item_duration").get_text())
 		last_sec = 0
 		for x in range(1,20):
-			play_sec = t2s(d(resourceId="com.xiangkan.android:id/player_time").get_text())
+			try:
+				play_sec = t2s(d(resourceId="com.xiangkan.android:id/player_time").get_text())
+			except UiObjectNotFoundError:
+				print("player_time not found"
+				continue
+				pass
+				
+
 
 			if last_sec == play_sec:
 				d(resourceId="com.xiangkan.android:id/video_item_play_btn").click()
