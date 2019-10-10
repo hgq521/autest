@@ -2,6 +2,7 @@
 import uiautomator2 as u2
 import time
 import xk.xk as xiankan
+import hs.hs as huoshan
 
 class sj:
 	
@@ -42,8 +43,15 @@ class sj:
 			if (pk == "com.xiangkan.android"):
 				app = xiankan.xk(self.d, pk)
 				self.apps.append(app)
+				continue
+
+			if (pk == "com.ss.android.ugc.livelite"):
+				app = huoshan.hs(self.d, pk)
+				self.apps.append(app)
+				continue
 
 if __name__ == '__main__':
 	mo = sj(serl='66J5T19603005713')
 	mo.add_app("com.xiangkan.android")
+	mo.add_app("com.ss.android.ugc.livelite")
 	mo.run()
