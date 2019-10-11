@@ -260,7 +260,7 @@ class xk:
 		self.last_time = 0
 		self.last_coin = 0
 		self.signed = False
-		self.wenzhang_over = True
+		self.wenzhang_over = False
 		self.shipin_over = False
 		self.fudai_time = 0
 		self.fudai_count = 0
@@ -297,8 +297,11 @@ class xk:
 			return False
 		if not self.time_award():
 			return False
+		self.d.watcher("readmore").when(resourceId="com.xiangkan.android:id/more_minute_btn").click()
 		if not self.wenzhang():
+			self.d.watchers.remove("readmore")
 			return False
+		self.d.watchers.remove("readmore")
 		if not self.shipin():
 			return False
 		return True
@@ -361,8 +364,8 @@ class xk:
 
 		#wenzhang
 		ret = False
-		tv_text = "阅读文章 30 秒"
-		#tv_text = "阅读文章0.5分钟(圆圈转1圈)"
+		#tv_text = "阅读文章 30 秒"
+		tv_text = "阅读文章0.5分钟(圆圈转1圈)"
 
 		for x in range(1,3):
 			title_tv_res_id = "com.xiangkan.android:id/title_tv"
@@ -506,8 +509,8 @@ class xk:
 			return True
 		d = self.d
 		d.swipe_ext("down",0.9)
-		tv_text = "观看视频 1 分钟"
-		#tv_text = "观看视频1分钟(圆圈转1圈)"
+		#tv_text = "观看视频 1 分钟"
+		tv_text = "观看视频1分钟(圆圈转1圈)"
 		for x in range(1,3):
 			if d(resourceId="com.xiangkan.android:id/title_tv", text=tv_text).wait(1.0):
 				print("shipin")
