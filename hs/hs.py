@@ -496,9 +496,11 @@ class hs:
 			if d(resourceId="com.ss.android.ugc.livelite:id/a0c").wait(2.0):
 				get_btn = d(resourceId="com.ss.android.ugc.livelite:id/a0d")
 				if "点击领取" == get_btn.get_text():
-					x, y = get_btn.center()
 					d.swipe_ext('up', 0.3)
 					d.swipe_ext('down', 0.3)
+					time.sleep(1.0)
+					get_btn = d(resourceId="com.ss.android.ugc.livelite:id/a0d")
+					x, y = get_btn.center()
 					d.click(x, y)
 					d.swipe_ext('up', 0.3)
 					last_sec = time.time()
