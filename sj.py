@@ -46,7 +46,8 @@ class sj:
 				continue
 
 			if (pk == "com.ss.android.ugc.livelite"):
-				app = huoshan.hs(self.d, pk)
+				app = huoshan.hs(self.d, pk, self.serl)
+				app.load()
 				self.apps.append(app)
 				continue
 

@@ -2,6 +2,7 @@ import uiautomator2 as u2
 from uiautomator2.exceptions import (UiObjectNotFoundError,
 									 UiautomatorQuitError)
 import time
+from db.myrethinkdb import mydb
 
 def hailianshipin():
 	ret = False
@@ -205,16 +206,84 @@ def kan_sp():
 
 class hs:
 	
-	def __init__(self, d, name):
+	def __init__(self, d, name, device):
 		self.name = name
 		self.d = d
+
 		self.signed = False
 		self.last_time = 0
 		self.last_lb_time = 0
 		self.hlsp_over = False
 		self.kan_sp_over = False
+		self.next_refresh_time = 0
 
+		self.db = mydb()
+		self.db.connect()
+		self.db.get_db("autest")
+		self.tab_name = "hs"
+		self.device = device
+
+	def do_init(self):
+		self.signed = False
+		#self.last_time = 0
+		#self.last_lb_time = 0
+		self.hlsp_over = False
+		self.kan_sp_over = False
+		self.next_refresh_time = mytime.mytime.today_hour(24)
+		self.save()
+
+
+	def has_task(self):
+		if not self.hlsp_over:
+			return True
+		if not self.kan_sp_over:
+			return True
+
+		sec = time.time()
+		if (sec - self.last_lb_time) > 1800:
+			return True
+
+		return False
+
+	def load(self):
+		tab = self.db.tab(self.tab_name)
+		
+		cur = tab.get(self.device).run()
+		if cur == None:
+			data = self.gen()
+			data['id'] = self.device
+			tab.insert(data).run()
+			return
+
+		for item in cur:
+			print("load")
+			print(item)	
+			self.signed = item['signed']
+			self.last_time = item['last_time']
+			self.last_lb_time = item['last_lb_time']
+			self.hlsp_over = item['hlsp_over']
+			self.kan_sp_over = item['kan_sp_over']
+			self.next_refresh_time = item['next_refresh_time']
+			return
+		data = self.gen()
+		data['id'] = self.device
+		tab.insert(data).run()
+	
+	def gen(self):
+		data = {}
+		data['signed'] = self.signed
+		data['last_time'] = self.last_time
+		data['last_lb_time'] = self.last_lb_time
+		data['hlsp_over'] = self.hlsp_over
+		data['kan_sp_over'] = self.kan_sp_over
+		data['next_refresh_time'] = self.next_refresh_time
+		return data
+		
 	def save(self):
+		data = self.gen()
+		tab = self.db.tab(self.tab_name)	
+		cur = tab.get(self.device).update(data).run()
+			
 		pass
 
 	def check_time(self):
@@ -225,8 +294,20 @@ class hs:
 	def set_time(self):
 		self.last_time = time.time()
 
+	def refresh(self):
+		sec = time.time()
+		if sec < self.next_refresh_time:
+			return
 
+		self.do_init()
+		
 	def run(self):
+		
+		self.refresh()
+
+		if not self.has_task():
+			print("hs no task")
+			return True
 		self.set_time()
 		print("set_time")
 		if not self.start_app():
@@ -236,19 +317,23 @@ class hs:
 		#if not self.sign():
 		#	print("sign return false")
 		#	return False
+		
+		ret = False
+		while True:
+			if not self.hongbao():
+				break
 
-		if not self.hongbao():
-			return False
+			print("hlsp")
+			if not self.kan_hlsp():
+				print("hlsp return false")
+				break
 
-		print("hlsp")
-		if not self.kan_hlsp():
-			print("hlsp return false")
-			return False
+			if not self.kan_sp():
+				break
 
-		if not self.kan_sp():
-			return False
-
-		return True
+			ret = True
+		self.d.app_stop(self.name)
+		return ret
 
 	def start_app(self):
 		print("start_app")
