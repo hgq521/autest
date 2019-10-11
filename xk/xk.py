@@ -641,6 +641,11 @@ class xk:
 		x, y = d(resourceId="com.xiangkan.android:id/title_tv", text=tv_text).center()
 		d.click(x,y)
 
+		time.sleep(1.0)
+		d.swipe_ext('up',0.5)
+		d.swipe_ext('up',0.5)
+		d.swipe_ext('up',0.5)
+		time.sleep(2.0)
 		for i in range(1,5):
 			self.each_shipin();
 			time.sleep(1.0)
