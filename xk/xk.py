@@ -571,7 +571,7 @@ class xk:
 			d.swipe_ext("up",0.2)
 			time.sleep(5.0)
 			dur = time.time()-cur
-			if dur > 95.0:
+			if dur > 70.0:
 				print("dur is %f"%(dur))	
 				break
 		
@@ -673,7 +673,7 @@ class xk:
 		dur_sec = t2s(d(resourceId="com.xiangkan.android:id/video_item_duration").get_text())
 		d.watcher("restart").when(resourceId="com.xiangkan.android:id/player_compete_restart").click()
 		for x in range(1,20):
-			if time.time() - now_sec > 1800:	
+			if time.time() - now_sec > 180:	
 				break
 			time.sleep(10.0)
 	
