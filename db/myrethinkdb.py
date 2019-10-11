@@ -9,6 +9,13 @@ class mydb:
 		self.db = {}
 		
 		pass
+	
+	def __del__(self):
+		self.close()
+
+
+	def close(self):
+		self.conn.close()
 
 	def connect(self):
 		self.conn = r.connect(self.cfg.ip, self.cfg.port)
