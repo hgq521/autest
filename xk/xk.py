@@ -3,6 +3,8 @@ from uiautomator2.exceptions import (UiObjectNotFoundError,
 									 UiautomatorQuitError)
 
 import time
+from db.myrethinkdb import mydb
+import mytime.mytime as timeutil
 
 def start_app(pk_name):
 	d.app_stop(pk_name)
@@ -254,9 +256,10 @@ def t2s(t):
 class xk:
 	
 	fudai_interval = 0,5,10,30,60,90
-	def __init__(self,d, name):
+	def __init__(self,d, name, device):
 		self.name = name
 		self.d = d
+
 		self.last_time = 0
 		self.last_coin = 0
 		self.signed = False
@@ -264,9 +267,76 @@ class xk:
 		self.shipin_over = False
 		self.fudai_time = 0
 		self.fudai_count = 0
+		self.next_refresh_time = 0
 
+		self.tab_name = 'xk'
+		self.db = mydb()
+		self.db.connect()
+		self.db.get_db("autest")
+		self.device = device
+		self.is_friday = False
 
+	def __del__(self):
+		self.db.close()
 		pass
+
+	def do_init(self):
+		#self.last_time = 0
+		#self.last_coin = 0
+		self.signed = False
+		self.wenzhang_over = False
+		self.shipin_over = False
+		self.fudai_time = 0
+		self.fudai_count = 0
+		self.next_refresh_time = timeutil.today_hour(24)
+		self.save()
+		if (timeutil.wday(time.time()) == 5:
+			self.is_friday = True
+		else:
+			self.is_friday = False
+
+	def load(self):
+		print(self.tab_name,"load")
+
+		if (timeutil.wday(time.time()) == 5:
+			self.is_friday = True
+		else:
+			self.is_friday = False
+
+		tab = self.db.tab(self.tab_name)
+
+		cur = tab.get(self.device).run()
+		if cur == None:
+			data = self.gen()
+			data['id'] = self.device
+			tab.insert(data).run()
+			return
+
+		print(cur)
+
+		self.last_time = cur['last_time']
+		self.last_coin = cur['last_coin']
+		self.signed = cur['signed']
+		self.wenzhang_over = cur['wenzhang_over']
+		self.shipin_over = cur['shipin_over']
+		self.fudai_time = cur['fudai_time']
+		self.fudai_count = cur['fudai_count']
+		self.next_refresh_time = cur['next_refresh_time']
+
+	def gen(self):
+		data = {}
+
+		data['last_time'] = self.last_time
+		data['last_coin'] = self.last_coin
+		data['signed'] = self.signed
+		data['wenzhang_over'] = self.wenzhang_over
+		data['shipin_over'] = self.shipin_over
+		data['fudai_time'] = self.fudai_time
+		data['fudai_count'] = self.fudai_count
+		data['next_refresh_time'] = self.next_refresh_time
+		
+		
+
 	@classmethod
 	def get_fudai_interval(xk, count):
 		if count < len(xk.fudai_interval):
@@ -278,6 +348,9 @@ class xk:
 		return len(xk.fudai_interval)	
 
 	def save(self):
+		data = self.gen()
+		tab = self.db.tab(self.tab_name)	
+		cur = tab.get(self.device).update(data).run()
 		pass
 
 	def check_time(self):
@@ -287,24 +360,57 @@ class xk:
 	
 	def set_time(self):
 		self.last_time = time.time()
+	
+	def refresh(self):
+		sec = time.time()
+		if sec < self.next_refresh_time:
+			return
+
+		self.do_init()
+		pass
+	
+	def has_task(self):
+		if self.check_time_award():
+			return True
+
+		if not self.wenzhang_over:
+			return True
+
+		if not self.shipin_over:
+			return True
+			
+		return False
 
 	def run(self):
+		self.refresh()
+
+		if not self.has_task():
+			print("xk no task")
+			return True
+
 		self.set_time()
 
 		if not self.start_app():
 			return False
-		if not self.sign():
-			return False
-		if not self.time_award():
-			return False
+
+		ret = False
 		self.d.watcher("readmore").when(resourceId="com.xiangkan.android:id/more_minute_btn").click()
-		if not self.wenzhang():
-			self.d.watchers.remove("readmore")
-			return False
+		while True:
+			
+			if not self.sign():
+				break
+			if not self.time_award():
+				break
+
+			if not self.wenzhang():
+				break	
+			if not self.shipin():
+				break
+
+			ret = True
+
 		self.d.watchers.remove("readmore")
-		if not self.shipin():
-			return False
-		return True
+		self.d.app_stop(self.name)
 	
 	def start_app(self):
 		self.d.app_stop(self.name)
@@ -326,11 +432,17 @@ class xk:
 		self.signed = True
 		self.save()
 		return True
-	
+	def check_time_award(self):
+
+		if sec - self.last_coin < timeutil.hour_sec():
+			return False
+
+		return True
+
 	def time_award(self):
 		sec = time.time()
 		d = self.d
-		if sec - self.last_coin < 3600:
+		if not self.check_time_award():
 			return True
 		
 		if (d(resourceId="com.xiangkan.android:id/tv_box_time_new").wait(2.0)):
@@ -345,7 +457,8 @@ class xk:
 				return True
 
 		d(resourceId="com.xiangkan.android:id/custom_integer_coin_box").click()
-		self.last_coin = sec
+		self.last_coin = timeutil.hour(sec) #取到小时
+		#self.last_coin = sec
 		self.save()
 		return True
 

@@ -3,6 +3,7 @@ from uiautomator2.exceptions import (UiObjectNotFoundError,
 									 UiautomatorQuitError)
 import time
 from db.myrethinkdb import mydb
+import mytime.mytime as timeutil
 
 def hailianshipin():
 	ret = False
@@ -223,13 +224,16 @@ class hs:
 		self.tab_name = "hs"
 		self.device = device
 
+	def __del__(self):
+		self.db.close()
+
 	def do_init(self):
 		self.signed = False
 		#self.last_time = 0
 		#self.last_lb_time = 0
 		self.hlsp_over = False
 		self.kan_sp_over = False
-		self.next_refresh_time = mytime.mytime.today_hour(24)
+		self.next_refresh_time = timeutil.today_hour(24)
 		self.save()
 
 
@@ -255,19 +259,14 @@ class hs:
 			tab.insert(data).run()
 			return
 
-		for item in cur:
-			print("load")
-			print(item)	
-			self.signed = item['signed']
-			self.last_time = item['last_time']
-			self.last_lb_time = item['last_lb_time']
-			self.hlsp_over = item['hlsp_over']
-			self.kan_sp_over = item['kan_sp_over']
-			self.next_refresh_time = item['next_refresh_time']
-			return
-		data = self.gen()
-		data['id'] = self.device
-		tab.insert(data).run()
+		print("load")
+		self.signed = cur['signed']
+		self.last_time = cur['last_time']
+		self.last_lb_time = cur['last_lb_time']
+		self.hlsp_over = cur['hlsp_over']
+		self.kan_sp_over = cur['kan_sp_over']
+		self.next_refresh_time = cur['next_refresh_time']
+		return
 	
 	def gen(self):
 		data = {}
