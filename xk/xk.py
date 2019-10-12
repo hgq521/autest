@@ -14,7 +14,7 @@ def start_app(pk_name):
 
 #click hongbao
 #hongbao_btn = d(resourceId="com.ss.android.ugc.livelite:id/vr").child(className="android.widget.RelativeLayout")[1].info
-
+'''
 #签到
 def sign():
 	if (d(resourceId="com.xiangkan.android:id/tv_box_hint").wait(2.0)):
@@ -240,7 +240,7 @@ def toshiping():
 def weiguan():
 	x, y = d(resourceId="com.xiangkan.android:id/title_tv", text="在围观内观看小视频5分钟").center()
 	d.click(x,y)
-
+'''
 
 
 def t2s(t):
@@ -410,7 +410,7 @@ class xk:
 				break
 			if not self.time_award():
 				break
-
+			
 			if not self.wenzhang():
 				break	
 			if not self.shipin():
@@ -776,6 +776,7 @@ class xk:
 			self.toshiping()
 			return
 		dur_sec = t2s(d(resourceId="com.xiangkan.android:id/video_item_duration").get_text())
+		#totest
 		d.watcher("restart").when(resourceId="com.xiangkan.android:id/player_compete_restart").click()
 		for x in range(1,20):
 			if time.time() - now_sec > 180:	
@@ -822,6 +823,57 @@ class xk:
 		
 		d.press("back")
 		return ret
+	
+	def qunhongbao(self):
+		d = self.d
+
+		if d(resourceId='com.xiangkan.android:id/tab_icon')[2].wait(1.0):
+			x, y = d(resourceId='com.xiangkan.android:id/tab_icon')[2].center()
+			d.click(x, y)
+			pass
+		
+		ret = False
+		for tv_name in d(resourceId='com.xiangkan.android:id/tv_name'):
+			text = tv_name.get_text()
+			if text.find('小分队'):
+				x, y = tv_name.center()
+				d.click(x, y)
+				ret = True
+				break
+
+		if not ret:
+			print('没有找到小分队')
+			return True
+		print('进入领取群红包')
+		for i in range(1,5):
+			ret = False
+			for item in d(resourceId='com.xiangkan.android:id/layout_packet'):
+				ret = False
+				for text in item.child(className='android.widget.TextView'):
+					if text.get_text() == '点击领取':
+						time.sleep(1.0)
+						print('领取群红包 ')
+						ret = True
+						break
+			
+				if ret:
+					item.click()
+					time.sleep(1.0)
+					d.press('back')
+					print('返回上一层')
+
+			if not ret:
+				break
+
+			d.swipe_ext('up', 0.3)
+			time.sleep(0.5)
+			
+
+		d.press('back')
+		print('领取完毕，返回')
+
+
+		return True
 
 
 if __name__ == '__main__':
