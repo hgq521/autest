@@ -35,7 +35,7 @@ class sj:
 		while True:
 			for app in self.apps:
 				if (app.run()):
-					self.apps.remove(app)
+					#self.apps.remove(app)
 					print("shanc")
 				time.sleep(2.0)
 	
