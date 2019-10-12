@@ -293,7 +293,7 @@ class xk:
 		self.fudai_count = 0
 		self.next_refresh_time = timeutil.today_hour(24)
 		self.save()
-		if (timeutil.wday(time.time()) == 5:
+		if timeutil.wday(time.time()) == 5:
 			self.is_friday = True
 		else:
 			self.is_friday = False
@@ -301,7 +301,7 @@ class xk:
 	def load(self):
 		print(self.tab_name,"load")
 
-		if (timeutil.wday(time.time()) == 5:
+		if timeutil.wday(time.time()) == 5:
 			self.is_friday = True
 		else:
 			self.is_friday = False
@@ -337,6 +337,7 @@ class xk:
 		data['fudai_time'] = self.fudai_time
 		data['fudai_count'] = self.fudai_count
 		data['next_refresh_time'] = self.next_refresh_time
+		return data
 		
 		
 
@@ -436,6 +437,7 @@ class xk:
 		self.save()
 		return True
 	def check_time_award(self):
+		sec = time.time()
 
 		if sec - self.last_coin < timeutil.hour_sec():
 			return False
@@ -443,7 +445,6 @@ class xk:
 		return True
 
 	def time_award(self):
-		sec = time.time()
 		d = self.d
 		if not self.check_time_award():
 			return True
@@ -460,12 +461,44 @@ class xk:
 				return True
 
 		d(resourceId="com.xiangkan.android:id/custom_integer_coin_box").click()
+		sec = time.time()
 		self.last_coin = timeutil.hour(sec) #取到小时
 		#self.last_coin = sec
 		self.save()
 		return True
 
+	def find_wenzhang(self):
+		d = self.d
+		tv_text = "阅读文章 30 秒"
+		if (self.is_friday):
+			tv_text = "阅读文章0.5分钟(圆圈转1圈)"
 
+		for x in range(1,3):
+			for title_tv in d(resourceId="com.xiangkan.android:id/title_tv"):
+				text = title_tv.get_text()
+				if not (text == tv_text):
+					continue
+				if title_tv.sibling(resourceId="com.xiangkan.android:id/status_fl")[0].wait(1.0):
+					pass
+				else:
+					continue
+
+				if title_tv.sibling(resourceId="com.xiangkan.android:id/status_fl")[0].child(className="android.widget.TextView")[0].wait(1.0):
+					pass
+				else:
+					continue
+
+				tt = title_tv.sibling(resourceId="com.xiangkan.android:id/status_fl")[0].child(className="android.widget.TextView")[0].get_text()
+				if tt == "已完成":
+					return False
+				else:
+					return True, title_tv
+			
+			print("not found", tv_text)
+			d.swipe_ext('up', 0.3)
+			time.sleep(1.0)
+			
+		return False
 	def wenzhang(self):
 
 		d = self.d
@@ -479,6 +512,7 @@ class xk:
 			return True
 
 		#wenzhang
+		'''
 		ret = False
 		#tv_text = "阅读文章 30 秒"
 		tv_text = "阅读文章0.5分钟(圆圈转1圈)"
@@ -508,9 +542,11 @@ class xk:
 				#			ret = False
 
 				break
-			print("not found")
+			#print("not found")
 
 			d.swipe_ext("up",0.3)
+		'''
+		ret, title_tv = self.find_wenzhang()
 
 
 		if not ret:
@@ -519,7 +555,8 @@ class xk:
 			return True
 
 		time.sleep(2.0)
-		x, y = d(resourceId="com.xiangkan.android:id/title_tv", text=tv_text).center()
+		#x, y = d(resourceId="com.xiangkan.android:id/title_tv", text=tv_text).center()
+		x, y = title_tv.center()
 		d.click(x,y)
 
 		for i in range(1,20):
