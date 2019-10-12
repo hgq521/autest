@@ -4,7 +4,7 @@ from uiautomator2.exceptions import (UiObjectNotFoundError,
 import time
 from db.myrethinkdb import mydb
 import mytime.mytime as timeutil
-
+'''
 def hailianshipin():
 	ret = False
 	#d.xpath('//*[@resource-id="app"]/android.view.View[8]').click()
@@ -204,6 +204,7 @@ def kan_sp():
 		print("普通视频")
 
 		#com.ss.android.ugc.livelite:id/a1s  zhuan
+'''
 
 class hs:
 	
@@ -333,7 +334,9 @@ class hs:
 			if not self.kan_sp():
 				break
 
+			
 			ret = True
+			break
 		self.d.app_stop(self.name)
 		return ret
 
