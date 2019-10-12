@@ -412,6 +412,7 @@ class xk:
 				break
 
 			ret = True
+			break
 
 		self.d.watchers.remove("readmore")
 		self.d.app_stop(self.name)
@@ -468,15 +469,20 @@ class xk:
 		return True
 
 	def find_wenzhang(self):
-		d = self.d
 		tv_text = "阅读文章 30 秒"
 		if (self.is_friday):
 			tv_text = "阅读文章0.5分钟(圆圈转1圈)"
 
+		return self.find_text(tv_text)
+
+	def find_text(self, tv_text):
+		d = self.d
 		time.sleep(1.0)
+		d.swipe_ext('down', 0.5)
 		for x in range(1,3):
 			for title_tv in d(resourceId="com.xiangkan.android:id/title_tv"):
 				text = title_tv.get_text()
+				print(text)
 				if not (text == tv_text):
 					continue
 				if title_tv.sibling(resourceId="com.xiangkan.android:id/status_fl")[0].wait(1.0):
@@ -491,7 +497,7 @@ class xk:
 
 				tt = title_tv.sibling(resourceId="com.xiangkan.android:id/status_fl")[0].child(className="android.widget.TextView")[0].get_text()
 				if tt == "已完成":
-					return False
+					return False, {}
 				else:
 					return True, title_tv
 			
@@ -499,7 +505,14 @@ class xk:
 			d.swipe_ext('up', 0.3)
 			time.sleep(0.5)
 			
-		return False
+		return False, {}
+	def find_shipin(self):
+		tv_text = "观看视频 1 分钟"
+		if (self.is_friday):
+			tv_text = "观看视频1分钟(圆圈转1圈)"
+		
+		return self.find_text(tv_text)
+
 	def wenzhang(self):
 
 		d = self.d
@@ -663,6 +676,7 @@ class xk:
 			return True
 		d = self.d
 		d.swipe_ext("down",0.9)
+		'''
 		#tv_text = "观看视频 1 分钟"
 		tv_text = "观看视频1分钟(圆圈转1圈)"
 		for x in range(1,3):
@@ -673,13 +687,18 @@ class xk:
 
 			print("找不到 %s"%(tv_text))
 			d.swipe_ext("up",0.3)
+		'''
+		
+		ret, title_tv = self.find_shipin()
 
 		if not ret:
 			self.shipin_over = True
 			self.save()
 			return True
 		time.sleep(1.0)
-		x, y = d(resourceId="com.xiangkan.android:id/title_tv", text=tv_text).center()
+		#x, y = d(resourceId="com.xiangkan.android:id/title_tv", text=tv_text).center()
+
+		x, y = title_tv.center()
 		d.click(x,y)
 
 		time.sleep(1.0)
