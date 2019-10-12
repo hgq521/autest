@@ -473,6 +473,7 @@ class xk:
 		if (self.is_friday):
 			tv_text = "阅读文章0.5分钟(圆圈转1圈)"
 
+		time.sleep(1.0)
 		for x in range(1,3):
 			for title_tv in d(resourceId="com.xiangkan.android:id/title_tv"):
 				text = title_tv.get_text()
@@ -496,7 +497,7 @@ class xk:
 			
 			print("not found", tv_text)
 			d.swipe_ext('up', 0.3)
-			time.sleep(1.0)
+			time.sleep(0.5)
 			
 		return False
 	def wenzhang(self):
