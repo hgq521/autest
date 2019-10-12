@@ -57,6 +57,6 @@ class sj:
 
 if __name__ == '__main__':
 	mo = sj(serl='66J5T19603005713')
-	mo.add_app("com.xiangkan.android")
-	mo.add_app("com.ss.android.ugc.livelite")
+	mo.add_app("com.xiangkan.android", "xk")
+	mo.add_app("com.ss.android.ugc.livelite", "hs")
 	mo.run()
