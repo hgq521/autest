@@ -826,11 +826,25 @@ class xk:
 	
 	def qunhongbao(self):
 		d = self.d
+		if not d(resourceId="com.xiangkan.android:id/iv_redpacket").wait(2.0)
+			return True
 
+		
+		if not d(resourceId="com.xiangkan.android:id/iv_msg_count").wait(2.0):
+			return True
+
+		if d(resourceId="com.xiangkan.android:id/iv_msg_count").get_text() == "":
+			return True
+
+		x, y =  d(resourceId="com.xiangkan.android:id/iv_redpacket").center()
+		d.click(x, y)
+
+		'''
 		if d(resourceId='com.xiangkan.android:id/tab_icon')[2].wait(1.0):
 			x, y = d(resourceId='com.xiangkan.android:id/tab_icon')[2].center()
 			d.click(x, y)
 			pass
+		'''
 		
 		ret = False
 		for tv_name in d(resourceId='com.xiangkan.android:id/tv_name'):
@@ -851,15 +865,16 @@ class xk:
 				ret = False
 				for text in item.child(className='android.widget.TextView'):
 					if text.get_text() == '点击领取':
-						time.sleep(1.0)
 						print('领取群红包 ')
 						ret = True
 						break
 			
 				if ret:
 					item.click()
-					time.sleep(1.0)
-					d.press('back')
+
+					d(resourceId="com.xiangkan.android:id/iv_open_result").wait(2.0).click()
+					time.sleep(3.0)
+					#d.press('back')
 					print('返回上一层')
 
 			if not ret:
