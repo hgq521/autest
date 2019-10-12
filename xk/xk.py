@@ -276,6 +276,9 @@ class xk:
 		self.device = device
 		self.is_friday = False
 
+	def set_tab_name(self, tab_name):
+		self.tab_name = tab_name
+
 	def __del__(self):
 		self.db.close()
 		pass

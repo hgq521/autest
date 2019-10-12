@@ -9,7 +9,7 @@ class sj:
 	def __init__(self, ip='', serl=''):
 		self.ip = ip
 		self.serl = serl
-		self.pks = [] 
+		self.pks = {} 
 		self.apps = []
 		self.d = {}
 		pass
@@ -20,8 +20,9 @@ class sj:
 		else:
 			self.d = u2.connect(self.serl)
 
-	def add_app(self, pk_name):
-		self.pks.append(pk_name)
+	def add_app(self, pk_name, tab_name):
+		self.pks[tab_name] = pk_name
+		#self.pks.append(pk_name)
 
 	def run(self):
 		self.connect()
@@ -39,14 +40,17 @@ class sj:
 				time.sleep(2.0)
 	
 	def init_app(self):
-		for pk in self.pks:
+		for tab, pk in self.pks.items():
 			if (pk == "com.xiangkan.android"):
-				app = xiankan.xk(self.d, pk)
+				app = xiankan.xk(self.d, pk, self.serl)
+				app.set_tab_name(tab)
+				app.load()
 				self.apps.append(app)
 				continue
 
 			if (pk == "com.ss.android.ugc.livelite"):
 				app = huoshan.hs(self.d, pk, self.serl)
+				app.set_tab_name(tab)
 				app.load()
 				self.apps.append(app)
 				continue

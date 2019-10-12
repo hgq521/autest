@@ -227,6 +227,9 @@ class hs:
 	def __del__(self):
 		self.db.close()
 
+	def set_tab_name(self, tab_name):
+		self.tab_name = tab_name
+
 	def do_init(self):
 		self.signed = False
 		#self.last_time = 0
