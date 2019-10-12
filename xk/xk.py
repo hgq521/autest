@@ -267,6 +267,7 @@ class xk:
 		self.shipin_over = False
 		self.fudai_time = 0
 		self.fudai_count = 0
+		self.weiguan_over = False
 		self.next_refresh_time = 0
 
 		self.tab_name = 'xk'
@@ -291,6 +292,7 @@ class xk:
 		self.shipin_over = False
 		self.fudai_time = 0
 		self.fudai_count = 0
+		self.weiguan_over = False
 		self.next_refresh_time = timeutil.today_hour(24)
 		self.save()
 		if timeutil.wday(time.time()) == 5:
@@ -325,6 +327,8 @@ class xk:
 		self.fudai_time = cur['fudai_time']
 		self.fudai_count = cur['fudai_count']
 		self.next_refresh_time = cur['next_refresh_time']
+		if ('weiguan_over' in cur):
+			self.weiguan_over = cur['weiguan_over']
 
 	def gen(self):
 		data = {}
@@ -336,6 +340,7 @@ class xk:
 		data['shipin_over'] = self.shipin_over
 		data['fudai_time'] = self.fudai_time
 		data['fudai_count'] = self.fudai_count
+		data['weiguan_over'] = self.weiguan_over
 		data['next_refresh_time'] = self.next_refresh_time
 		return data
 		
@@ -411,6 +416,9 @@ class xk:
 			if not self.shipin():
 				break
 
+			if not self.weiguan():
+				break
+
 			ret = True
 			break
 
@@ -475,6 +483,10 @@ class xk:
 
 		return self.find_text(tv_text)
 
+	def find_weiguan(self):
+		tv_text = "在围观内观看小视频5分钟"
+		return self.find_text(tv_text)
+
 	def find_text(self, tv_text):
 		d = self.d
 		time.sleep(1.0)
@@ -512,17 +524,41 @@ class xk:
 			tv_text = "观看视频1分钟(圆圈转1圈)"
 		
 		return self.find_text(tv_text)
+	
+	def towode(self):
+		d = self.d
+		print("towode")
+		for i in range(1, 3):
+			if d(resourceId="com.xiangkan.android:id/tv_tab_title", text="我的").wait(1.0):
+				#x, y = d(resourceId="com.xiangkan.android:id/tv_tab_title", text="我的").center()
+				x, y = d(resourceId="com.xiangkan.android:id/tv_tab_title", text="我的").\
+				sibling(resourceId="com.xiangkan.android:id/tab_icon").center()
+				d.click(x, y)
+				print("towode ok")
+				return True
+			else:
+				d.press('back')
+
+			time.sleep(0.5)
+
+		print("towode failed")
+		return False
+
+		pass
 
 	def wenzhang(self):
 
 		d = self.d
 
-		x,y = d(resourceId="com.xiangkan.android:id/tv_tab_title",
-		text="我的").sibling(resourceId="com.xiangkan.android:id/tab_icon").center()
+		#x,y = d(resourceId="com.xiangkan.android:id/tv_tab_title",
+		#text="我的").sibling(resourceId="com.xiangkan.android:id/tab_icon").center()
 
-		d.click(x,y)
+		#d.click(x,y)
 
 		if (self.wenzhang_over):
+			return True
+
+		if not self.towode():
 			return True
 
 		#wenzhang
@@ -674,8 +710,12 @@ class xk:
 		ret = False
 		if self.shipin_over:
 			return True
+
+		if not self.towode():
+			return False
+
 		d = self.d
-		d.swipe_ext("down",0.9)
+		#d.swipe_ext("down",0.9)
 		'''
 		#tv_text = "观看视频 1 分钟"
 		tv_text = "观看视频1分钟(圆圈转1圈)"
@@ -747,6 +787,41 @@ class xk:
 	
 	def toshiping(self):
 		self.toshouye()
+
+
+	def weiguan(self):
+		if self.weiguan_over:
+			return True
+
+		#我的
+
+		if not self.towode():
+			return False
+			
+		time.sleep(1.0)
+
+		d = self.d
+		d.swipe_ext('down', 0.9)
+
+		ret, title_tv = self.find_weiguan()
+
+		if not ret:
+			self.weiguan_over = True
+			self.save()
+			return True
+
+		time.sleep(1.0)
+		x, y = title_tv.center()
+		d.click(x, y)
+		for i in range(1, 60):
+			time.sleep(10.0)
+			d.swipe_ext('up', 0.3)
+			if self.check_time():
+				ret = False
+				break
+		
+		d.press("back")
+		return ret
 
 
 if __name__ == '__main__':
