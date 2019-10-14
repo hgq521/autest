@@ -647,6 +647,7 @@ class xk:
 
 	def onewenzhang(self):
 		d = self.d
+		cur = time.time()
 		if not (d(resourceId="com.xiangkan.android:id/ringProgressBar").wait(2.0)):
 			self.toshouye()
 			return
@@ -655,7 +656,11 @@ class xk:
 			self.toshouye()
 			return
 
-		cur = time.time()
+		if d(resourceId="com.xiangkan.android:id/video_item_duration").wait(2.0):
+			self.toshouye()
+			print('is video return')
+			return
+
 		for x in range(1,20):
 			d.swipe_ext("down",0.2)
 			d.swipe_ext("up",0.2)
