@@ -478,6 +478,7 @@ class hs:
 		d = self.d
 		ret = False
 		count = 0
+		'''
 		for item in d(resourceId="app").child(className="android.view.View",clickable=True):
 			count = count+1
 			if (count >10):
@@ -486,6 +487,41 @@ class hs:
 				if item.child(className="android.view.View")[0].get_text() == "看视频赚海量金币":
 					item.click()
 					break
+		'''
+
+		d.swipe_ext('up', 0.1)
+		time.sleep(1.0)
+
+		ret = False
+		for item in d(resourceId='app').child(className='android.widget.Image'):
+			sli_tmp = {}
+			count = 0
+			for sli in item.sibling(className='android.view.View'):
+				text = sli.get_text()
+				if count == 0:
+					if text == '看视频赚海量金币':
+						ret = True
+						count += 1
+						sli_tmp = sli
+						continue
+					else:
+						break
+				elif count == 1:
+					count += 1
+
+				elif count == 2:
+					if text == '已完成':
+						ret = False
+						break
+
+			if ret:
+				x, y = sli_tmp.center()
+				print("click (%u, %u)"%(x, y))
+				d.click(x, y)
+				break
+
+		if not ret:
+			return False
 
 		if (d(text="关闭广告").wait(60.0)):
 			print("guanbiguangg")
@@ -527,6 +563,8 @@ class hs:
 		#	return True
 		#tt.click()		
 		
+		d.swipe_ext('up', 0.1)
+		time.sleep(1.0)
 		ret = False
 		for item in d(resourceId="app").child(className="android.widget.Image"):
 			sli_tmp = {}
@@ -553,8 +591,8 @@ class hs:
 					break
 
 			if ret:
-				print("click")
 				x, y = sli_tmp.center()
+				print("click (%u, %u)"%(x, y))
 				d.click(x, y)
 				break
 
