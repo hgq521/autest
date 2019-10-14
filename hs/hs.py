@@ -1,3 +1,5 @@
+import sys
+sys.path.append('E:\\pythontest\\tt\\autest') 
 import uiautomator2 as u2
 from uiautomator2.exceptions import (UiObjectNotFoundError,
 									 UiautomatorQuitError)
@@ -458,24 +460,29 @@ class hs:
 		d = self.d
 		ret = False
 		d.watcher("quit_con").when(resourceId="com.ss.android.ugc.livelite:id/rl").click()
+		d.watcher('con_quit').when(resourceId="com.ss.android.ugc.livelite:id/r_").click()
 		while True:
+			print("kan_hlsp 5")
 			if not self.hailianshipin():
 				self.hlsp_over = True
 				self.save()
 				ret = True
 				break
-			time.sleep(1.0)
+			#time.sleep(1.0)
+			print("kan_hlsp 2")
 			if self.check_time():
 				print("kan_hlsp 3")
 				break
 
 		d.watchers.remove("quit_con")
+		d.watchers.remove("con_quit")
 
 		return ret
 
 	def hailianshipin(self):
-		
+		print('hailianshipin')	
 		d = self.d
+		d.swipe_ext('down', 0.5)
 		ret = False
 		count = 0
 		'''
@@ -489,53 +496,75 @@ class hs:
 					break
 		'''
 
-		d.swipe_ext('up', 0.1)
-		time.sleep(1.0)
+		for i in range(1,3):
+			d.swipe_ext('up', 0.3)
+			time.sleep(1.0)
 
-		ret = False
-		for item in d(resourceId='app').child(className='android.widget.Image'):
-			sli_tmp = {}
-			count = 0
-			for sli in item.sibling(className='android.view.View'):
-				text = sli.get_text()
-				if count == 0:
-					if text == '看视频赚海量金币':
-						ret = True
+			ret = False
+			over = True
+			for item in d(resourceId='app').child(className='android.widget.Image'):
+				sli_tmp = {}
+				count = 0
+				for sli in item.sibling(className='android.view.View'):
+					text = sli.get_text()
+					print('search hlsp:', text)
+					if count == 0:
+						if text == '看视频赚海量金币':
+							ret = True
+							count += 1
+							sli_tmp = sli
+							continue
+						else:
+							break
+					elif count == 1:
 						count += 1
-						sli_tmp = sli
-						continue
-					else:
-						break
-				elif count == 1:
-					count += 1
 
-				elif count == 2:
-					if text == '已完成':
-						ret = False
-						break
+					elif count == 2:
+					
+						print(text)
+						if text == '已完成':
+							return False
+						else:
+							over = False
 
-			if ret:
-				x, y = sli_tmp.center()
-				print("click (%u, %u)"%(x, y))
-				d.click(x, y)
+				if not over:
+					x, y = sli_tmp.center()
+					print("click (%u, %u)"%(x, y))
+					d.click(x, y)
+					break
+
+		if ret:
+			if over:
+				print(" over")
+				return False
+			else:
+				print("not found")
+				return True
+
+		sec = time.time()
+		while True:
+			if (d(text="关闭广告").wait(60.0)):
+				print("guanbiguangg")
+				d(text="关闭广告").click()
+				time.sleep(1.0)
 				break
 
-		if not ret:
-			return False
+			sec = time.time()- sec
+			if sec < 60:
+				print('未到超时时间 %u' %(sec))
+				continue
+			else:
+				print("超时 %u"%(sec))
+				d.press("back")
+				break
 
-		if (d(text="关闭广告").wait(60.0)):
-			print("guanbiguangg")
-			d(text="关闭广告").click()
-			time.sleep(1.0)
-		else:
-			print("超时")
-			d.press("back")
 
-		if d(resourceId="com.ss.android.ugc.livelite:id/r_").wait(1.0):
-			d(resourceId="com.ss.android.ugc.livelite:id/r_").click()
 
-		if d.watchers.triggered:
-			print("triggered")
+		#if d(resourceId="com.ss.android.ugc.livelite:id/r_").wait(1.0):
+		#	d(resourceId="com.ss.android.ugc.livelite:id/r_").click()
+
+		#if d.watchers.triggered:
+		#	print("triggered")
 
 	
 		return True
@@ -562,45 +591,57 @@ class hs:
 		#if text.find("累积观看视频") == -1 :
 		#	return True
 		#tt.click()		
-		
-		d.swipe_ext('up', 0.1)
-		time.sleep(1.0)
+		d.swipe_ext('down', 0.5)
+
 		ret = False
-		for item in d(resourceId="app").child(className="android.widget.Image"):
-			sli_tmp = {}
-			count = 0
-			for sli in item.sibling(className="android.view.View"):
-				text = sli.get_text()
-				print("search 累计观看",text)
-				print(count)
-				if count == 0:
-					if (text.find("累积观看视频") != -1):
-						ret = True
-						count += 1
-						sli_tmp = sli
-						continue
-					else:
-						break
-				elif count == 1:
-					count += 1
-					continue
-				elif count == 2:
-					print("tttt")
-					if (text == "已完成"):
-						ret = False
-					break
+		over = False
+		for i in range(1,3):
 
 			if ret:
-				x, y = sli_tmp.center()
-				print("click (%u, %u)"%(x, y))
-				d.click(x, y)
 				break
+			d.swipe_ext('up', 0.3)
+			time.sleep(1.0)
+			for item in d(resourceId="app").child(className="android.widget.Image"):
+				sli_tmp = {}
+				count = 0
+				for sli in item.sibling(className="android.view.View"):
+					text = sli.get_text()
+					print("search 累计观看",text)
+					print(count)
+					if count == 0:
+						if (text.find("累积观看视频") != -1):
+							ret = True
+							count += 1
+							sli_tmp = sli
+							continue
+						else:
+							break
+					elif count == 1:
+						count += 1
+						continue
+					elif count == 2:
+						print("tttt")
+						if (text == "已完成"):
+							over = True
+						break
 
-		
+				if ret:
+					if not over:
+						x, y = sli_tmp.center()
+						print("click (%u, %u)"%(x, y))
+						d.click(x, y)
+					break
+
 		if not ret:
-			self.kan_sp_over = True
-			self.save()
 			return True
+		else:
+			if over:
+				self.kan_sp_over = True
+				self.save()
+				return False
+			else:
+				pass
+
 		last_sec = time.time()
 		while not self.check_time():
 
@@ -678,13 +719,14 @@ class hs:
 
 
 if __name__ == '__main__':
+	serl = '66J5T19603005713'
 	d = u2.connect('66J5T19603005713')
 	#start_app("com.ss.android.ugc.livelite")
 	#hongbao()
 	#sign()
 	#kan_hlsp()
 	#kan_sp()
-	tt = hs(d, "com.ss.android.ugc.livelite")
+	tt = hs(d, "com.ss.android.ugc.livelite", serl)
 	print("xxx")
 	tt.run()
 
