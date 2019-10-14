@@ -826,7 +826,7 @@ class xk:
 	
 	def qunhongbao(self):
 		d = self.d
-		if not d(resourceId="com.xiangkan.android:id/iv_redpacket").wait(2.0)
+		if not d(resourceId="com.xiangkan.android:id/iv_redpacket").wait(2.0):
 			return True
 
 		
