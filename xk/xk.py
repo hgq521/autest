@@ -1,3 +1,5 @@
+import sys
+sys.path.append('E:\\pythontest\\tt\\autest') 
 import uiautomator2 as u2
 from uiautomator2.exceptions import (UiObjectNotFoundError,
 									 UiautomatorQuitError)
@@ -563,38 +565,6 @@ class xk:
 
 		#wenzhang
 		'''
-		ret = False
-		#tv_text = "阅读文章 30 秒"
-		tv_text = "阅读文章0.5分钟(圆圈转1圈)"
-
-		for x in range(1,3):
-			title_tv_res_id = "com.xiangkan.android:id/title_tv"
-			if (d(resourceId=title_tv_res_id, text=tv_text).wait(1.0)):
-				stats_res_id = "com.xiangkan.android:id/status_fl"
-				stats_btn_res_id = "com.xiangkan.android:id/status_btn"
-				if d(resourceId = title_tv_res_id, text=tv_text).sibling(resourceId=stats_res_id)[0].wait(1.0):
-					if d(resourceId = title_tv_res_id, text=tv_text).sibling(resourceId=stats_res_id)\
-					[0].child(resourceId="stats_btn_res_id")[0].wait(2.0):
-						print("ttt")
-					else:
-						print("hhh")
-				else:
-					print("xxxasdfa")
-				ret = True
-				#for item in status:
-				#	status_btn = item.child(resourceId="stats_btn_res_id")
-
-				#	for tt in status_btn:
-				#		text = tt.get_text()
-				#		print("txxxx:",text)
-				#		if text == "已完成":
-				#			print("已完成")
-				#			ret = False
-
-				break
-			#print("not found")
-
-			d.swipe_ext("up",0.3)
 		'''
 		ret, title_tv = self.find_wenzhang()
 
@@ -610,9 +580,11 @@ class xk:
 		d.click(x,y)
 
 		for i in range(1,20):
+			print("wenzhang 0")
 			self.each_wenzhang();
 			time.sleep(1.0)
 
+			print("wenzhang 1")
 			d.swipe_ext("up",0.5)
 			time.sleep(4.0)
 			if (self.check_time()):
@@ -627,7 +599,7 @@ class xk:
 			print("tiaoquguangaole")
 			return
 			pass
-
+		print("each_wenzhang")
 		for item in infos:
 			text = item.get_text()
 		
@@ -648,20 +620,25 @@ class xk:
 	def onewenzhang(self):
 		d = self.d
 		cur = time.time()
+		print('onewenzhang ring')
 		if not (d(resourceId="com.xiangkan.android:id/ringProgressBar").wait(2.0)):
 			self.toshouye()
 			return
-
+		print('onewenzhang ward')
 		if self.check_no_award():
 			self.toshouye()
 			return
 
-		if d(resourceId="com.xiangkan.android:id/video_item_duration").wait(2.0):
-			self.toshouye()
-			print('is video return')
-			return
+		d.swipe_ext("down",0.2)
+		d.swipe_ext("up",0.2)
+		print('onewenzhang duration')
+		#if d(resourceId="com.xiangkan.android:id/video_item_duration").wait(2.0):
+		#	self.toshouye()
+		#	print('is video return')
+		#	return
 
 		for x in range(1,20):
+			print("onewenzhang");
 			d.swipe_ext("down",0.2)
 			d.swipe_ext("up",0.2)
 			time.sleep(5.0)
@@ -897,10 +874,16 @@ class xk:
 
 
 if __name__ == '__main__':
+	serl = '66J5T19603005713'
 	d = u2.connect('66J5T19603005713')
-	start_app("com.xiangkan.android")
-	sign()
-	time_award()
-	wode()
-	wenzhang()
+	#start_app("com.xiangkan.android")
+	#sign()
+	#time_award()
+	#wode()
+	#wenzhang()
 	#shipin()
+	tt = xk(d, "com.xiangkan.android", serl)
+	print("xxx")
+	#tt.set_tab_name(tab)
+	tt.load()
+	tt.run()
