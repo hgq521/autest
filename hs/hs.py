@@ -460,7 +460,7 @@ class hs:
 		d = self.d
 		ret = False
 		d.watcher("quit_con").when(resourceId="com.ss.android.ugc.livelite:id/rl").click()
-		d.watcher('con_quit').when(resourceId="com.ss.android.ugc.livelite:id/r_").click()
+		#d.watcher('con_quit').when(resourceId="com.ss.android.ugc.livelite:id/r_").click()
 		while True:
 			print("kan_hlsp 5")
 			if not self.hailianshipin():
@@ -475,7 +475,7 @@ class hs:
 				break
 
 		d.watchers.remove("quit_con")
-		d.watchers.remove("con_quit")
+		#d.watchers.remove("con_quit")
 
 		return ret
 
@@ -558,10 +558,12 @@ class hs:
 				d.press("back")
 				break
 
+		print("xxxxxxxxxxxxxxxxx")
 
 
-		#if d(resourceId="com.ss.android.ugc.livelite:id/r_").wait(1.0):
-		#	d(resourceId="com.ss.android.ugc.livelite:id/r_").click()
+		if d(resourceId="com.ss.android.ugc.livelite:id/r_").wait(2.0):
+			print("ttttt")
+			d(resourceId="com.ss.android.ugc.livelite:id/r_").click()
 
 		#if d.watchers.triggered:
 		#	print("triggered")
@@ -728,6 +730,8 @@ if __name__ == '__main__':
 	#kan_sp()
 	tt = hs(d, "com.ss.android.ugc.livelite", serl)
 	print("xxx")
+	#tt.set_tab_name(tab)
+	tt.load()
 	tt.run()
 
 		
