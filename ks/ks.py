@@ -19,7 +19,8 @@ class ks(app):
 		#self.start_app()
 		up = True
 		while (True):
-			time.sleep(1.0)
+			toast_msg = d.toast.get_message(1.0, 10.0, "no toast message")
+			print(toast_msg)
 			per = random.randint(1,10)
 			sw = 'down'
 			#if per < 7:
@@ -34,6 +35,7 @@ class ks(app):
 				print(sec_str, 'no red_packet')
 
 			print(sw)
+
 			d.swipe_ext(sw, 0.5)
 			up = not up
 			
