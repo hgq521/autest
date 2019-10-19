@@ -302,6 +302,8 @@ class xk:
 		else:
 			self.is_friday = False
 
+		self.is_friday = False
+
 	def load(self):
 		print(self.tab_name,"load")
 
@@ -479,7 +481,7 @@ class xk:
 		return True
 
 	def find_wenzhang(self):
-		tv_text = "阅读文章 30 秒"
+		tv_text = "阅读文章30秒"
 		if (self.is_friday):
 			tv_text = "阅读文章0.5分钟(圆圈转1圈)"
 
@@ -886,4 +888,6 @@ if __name__ == '__main__':
 	print("xxx")
 	#tt.set_tab_name(tab)
 	tt.load()
-	tt.run()
+	while True:
+		tt.run()
+		time.sleep(1.0)
