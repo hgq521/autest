@@ -76,13 +76,18 @@ def lb(d):
 		print("开宝箱,未处理的情况")
 		return
 
-
-	if (d(text="关闭广告").wait(30.0)):
-		print("guanbiguangg")
-		d(text="关闭广告").click()
-	else:
-		print("开宝箱看视频 超时")
-		d.press("back")
+	ret = True
+	for i in range (1,3):
+		if (d(text="关闭广告").wait(30.0)):
+			print("guanbiguangg")
+			d(text="关闭广告").click()
+			break
+		else:
+			print("开宝箱看视频0 超时")
+			if (i == 2):
+				print("开宝箱看视频 超时")
+				d.press("back")
+				break
 
 
 def start_app(pk_name):
@@ -459,7 +464,7 @@ class hs:
 		print("kan_hlsp 2")
 		d = self.d
 		ret = False
-		d.watcher("quit_con").when(resourceId="com.ss.android.ugc.livelite:id/rl").click()
+		#d.watcher("quit_con").when(resourceId="com.ss.android.ugc.livelite:id/rl").click()
 		#d.watcher('con_quit').when(resourceId="com.ss.android.ugc.livelite:id/r_").click()
 		while True:
 			print("kan_hlsp 5")
@@ -474,7 +479,7 @@ class hs:
 				print("kan_hlsp 3")
 				break
 
-		d.watchers.remove("quit_con")
+		#d.watchers.remove("quit_con")
 		#d.watchers.remove("con_quit")
 
 		return ret
@@ -652,6 +657,7 @@ class hs:
 			#	self.save()
 			#	break
 			#抽奖
+			'''
 			if d.xpath('//*[@resource-id="com.ss.android.ugc.livelite:id/a2"]/android.widget.RelativeLayout[1]').wait(2.0):
 				#todo	
 				item = d.xpath('//*[@resource-id="com.ss.android.ugc.livelite:id/a2"]/android.widget.RelativeLayout[1]')
@@ -687,6 +693,7 @@ class hs:
 					print("免费领取等待...")
 					time.sleep(10.0)
 					continue
+			'''
 
 			'''
 			if d.xpath('//*[@resource-id="com.ss.android.ugc.livelite:id/a2"]/android.widget.FrameLayout[1]').wait(2.0):
@@ -709,11 +716,14 @@ class hs:
 
 			now_sec = time.time()
 			diff_sec = now_sec - last_sec
-			if diff_sec > 15:
+			print("xxxxxxxxx1 %u" %(diff_sec))
+			t=10
+			if diff_sec > t:
 				last_sec = now_sec
 			else:
-				time.sleep(diff_sec - 15)
+				time.sleep(t- diff_sec)
 			d.swipe_ext("up", 0.3)
+			print("xxxxxxxxx2 %u" %(diff_sec))
 			print("普通视频")
 
 		return self.kan_sp_over
@@ -732,6 +742,8 @@ if __name__ == '__main__':
 	print("xxx")
 	#tt.set_tab_name(tab)
 	tt.load()
-	tt.run()
+	while True:
+		tt.run()
+		time.sleep(1.0)
 
 		

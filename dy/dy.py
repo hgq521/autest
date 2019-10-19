@@ -35,7 +35,7 @@ class dy(app):
 
 			print(sw)
 			d.swipe_ext(sw, 0.5)
-			up = not up
+			#up = not up
 			
 		pass
 
