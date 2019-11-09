@@ -261,6 +261,7 @@ class hs:
 		return False
 
 	def load(self):
+		
 		tab = self.db.tab(self.tab_name)
 		
 		cur = tab.get(self.device).run()
@@ -278,6 +279,7 @@ class hs:
 		self.kan_sp_over = cur['kan_sp_over']
 		self.next_refresh_time = cur['next_refresh_time']
 		return
+		
 	
 	def gen(self):
 		data = {}
@@ -416,13 +418,20 @@ class hs:
 		self.last_lb_time = time.time()
 		self.save()
 
-		if (d(text="关闭广告").wait(60.0)):
-			print("guanbiguangg")
-			d(text="关闭广告").click()
-		else:
-			print("开宝箱看视频 超时")
-			d.press("back")
-			pass
+		sec = time.time()
+		while True:
+			if (d(text="关闭广告").wait(60.0)):
+				print("guanbiguangg")
+				d(text="关闭广告").click()
+				break
+			sec = time.time() - sec
+			if (sec < 60):
+				print("未到超时时间 %u", sec)
+			else:
+				print("开宝箱看视频 超时")
+				d.press("back")
+				break
+				pass
 
 	def sign(self):
 		print("sign")
@@ -547,6 +556,11 @@ class hs:
 				return True
 
 		sec = time.time()
+		is_load = False
+		if d(resourceId="com.ss.android.ugc.livelite:id/o").wait(2.0):
+			if (d(resourceId="com.ss.android.ugc.livelite:id/o").get_text() == "立即下载"):
+				is_load = True
+				
 		while True:
 			if (d(text="关闭广告").wait(60.0)):
 				print("guanbiguangg")
@@ -565,10 +579,14 @@ class hs:
 
 		print("xxxxxxxxxxxxxxxxx")
 
+		if not is_load:
+			return True
 
-		if d(resourceId="com.ss.android.ugc.livelite:id/r_").wait(2.0):
+		#quit_str = "com.ss.android.ugc.livelite:id/rd"
+		quit_str = "com.ss.android.ugc.livelite:id/rh"
+		if d(resourceId=quit_str).wait(2.0):
 			print("ttttt")
-			d(resourceId="com.ss.android.ugc.livelite:id/r_").click()
+			d(resourceId=quit_str).click()
 
 		#if d.watchers.triggered:
 		#	print("triggered")

@@ -16,6 +16,7 @@ class mydb:
 
 	def close(self):
 		self.conn.close()
+		pass
 
 	def connect(self):
 		self.conn = r.connect(self.cfg.ip, self.cfg.port)
@@ -37,9 +38,11 @@ class mydb:
 		self.create_db(db_name)
 		self.db = r.db(db_name)
 		return self.db
+		pass
 
 	def tab(self, tab_name):
 		self.create_tab(tab_name)
 		return self.db.table(tab_name)
+		pass
 
 

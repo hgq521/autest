@@ -21,15 +21,15 @@ class ks(app):
 		while (True):
 			toast_msg = d.toast.get_message(1.0, 10.0, "no toast message")
 			print(toast_msg)
-			per = random.randint(1,10)
+			per = random.randint(2,4)
 			sw = 'down'
 			#if per < 7:
 			if up:
 				sw = 'up'
-			if d(resourceId="com.kuaishou.nebula:id/red_packet").wait(2.0):
+			if True: #d(resourceId="com.kuaishou.nebula:id/red_packet").wait(2.0):
 				sec_str = time.asctime(time.localtime(time.time()))
 				print(sec_str, "success")
-				time.sleep(per+2.0)
+				time.sleep(per)
 			else:
 				sec_str = time.asctime(time.localtime(time.time()))
 				print(sec_str, 'no red_packet')
