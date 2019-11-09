@@ -302,7 +302,7 @@ class xk:
 		else:
 			self.is_friday = False
 
-		self.is_friday = False
+		#self.is_friday = False
 
 	def load(self):
 		print(self.tab_name,"load")
@@ -367,8 +367,11 @@ class xk:
 		pass
 
 	def check_time(self):
+		'''
 		if time.time() - self.last_time > 600:
 			return True
+		return False
+		'''
 		return False
 	
 	def set_time(self):
@@ -481,9 +484,10 @@ class xk:
 		return True
 
 	def find_wenzhang(self):
-		tv_text = "阅读文章30秒"
+		tv_text = "阅读文章 30 秒"
 		if (self.is_friday):
-			tv_text = "阅读文章0.5分钟(圆圈转1圈)"
+			#tv_text = "阅读文章0.5分钟(圆圈转1圈)"
+			tv_text = "阅读文章30秒"
 
 		return self.find_text(tv_text)
 
@@ -525,7 +529,8 @@ class xk:
 	def find_shipin(self):
 		tv_text = "观看视频 1 分钟"
 		if (self.is_friday):
-			tv_text = "观看视频1分钟(圆圈转1圈)"
+			#tv_text = "观看视频1分钟(圆圈转1圈)"
+			tv_text = "观看视频1分钟"
 		
 		return self.find_text(tv_text)
 	
@@ -581,7 +586,7 @@ class xk:
 		x, y = title_tv.center()
 		d.click(x,y)
 
-		for i in range(1,20):
+		for i in range(1,1000):
 			print("wenzhang 0")
 			self.each_wenzhang();
 			time.sleep(1.0)
@@ -730,11 +735,11 @@ class xk:
 		d.swipe_ext('up',0.5)
 		d.swipe_ext('up',0.5)
 		time.sleep(2.0)
-		for i in range(1,5):
+		for i in range(1,1000):
 			self.each_shipin();
 			time.sleep(1.0)
 			d.swipe_ext("up",0.5)
-			time.sleep(4.0)
+			time.sleep(1.0)
 			if self.check_time():
 				return False
 	
@@ -763,9 +768,9 @@ class xk:
 		#totest
 		d.watcher("restart").when(resourceId="com.xiangkan.android:id/player_compete_restart").click()
 		for x in range(1,20):
-			if time.time() - now_sec > 180:	
+			if time.time() - now_sec > 160:	
 				break
-			time.sleep(10.0)
+			time.sleep(5.0)
 	
 		d.watchers.remove("restart")
 		self.toshiping()

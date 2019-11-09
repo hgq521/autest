@@ -29,7 +29,8 @@ class suabao(app):
 			if True:#d(resourceId="com.kuaishou.nebula:id/red_packet").wait(2.0):
 				sec_str = time.asctime(time.localtime(time.time()))
 				print(sec_str, "success")
-				time.sleep(per+20.0)
+				#time.sleep(per+5.0)
+				time.sleep(18.0)
 			else:
 				sec_str = time.asctime(time.localtime(time.time()))
 				print(sec_str, 'no red_packet')
