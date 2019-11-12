@@ -14,11 +14,14 @@ class ks(app):
 	def __init__(self, d, name, device):
 		super(ks, self).__init__(d, name, device)
 
+	
 	def run(self):
+		sec = time.time() // 1
 		d = self.d
+		file_name = "p"+time.strftime("%Y%m%d_%H%M%S", time.localtime())+".png"
 		#self.start_app()
 		up = True
-		d.screenshot(".\p2.png");
+		d.screenshot(file_name);
 
 if __name__ == '__main__':
 	serl = '66J5T19603005713'
