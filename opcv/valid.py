@@ -1,3 +1,6 @@
+
+import sys
+sys.path.append('E:\\pythontest\\tt\\autest') 
 import numpy as np
 import argparse
 import time
@@ -58,7 +61,8 @@ def get_loc(img_gray, from_y, from_x, huidu):
 				count = 0
 				continue;
 			
-	'''test
+	#test
+	'''
 	print("startx endx %u %u, count %u" %(start_x, end_x, max_count))
 	for y in range(20):
 		tmp_y = from_y - 10 + y
@@ -71,8 +75,10 @@ def get_loc(img_gray, from_y, from_x, huidu):
 		loc = (start_x + end_x) // 2
 		if (img_gray[tmp_y, loc] < huidu):
 			img_gray[tmp_y, loc] = 0
-	print(img_gray)
+	#print(img_gray)
 	cv2.imshow('img3',img_gray)
+	cv2.waitKey(0)
+	print("xxxxxxxxxxxxxxxxx %u"% (from_y))
 	'''
 	return start_x, end_x, max_count
 
@@ -125,8 +131,13 @@ def find_slot(file_name):
 if __name__ == '__main__':
 	
 	tt = Logger().get_log
-	dpath = 'sshot/data/'
-	files = os.listdir(dpath)
+	#dpath = 'sshot/data/'
+	dpath = '../'
+
+	#files = os.listdir(dpath)
+	files = []
+	files.append('p20191113_173904.png')
+
 	for file_name in files:
 		print("xxxxxxxx:"+file_name)
 		ret, start_x, end_x = find_slot(dpath+file_name)
@@ -134,3 +145,4 @@ if __name__ == '__main__':
 			tt.error("%s final got start_x %u, end_x %u " %(file_name,start_x, end_x))
 		else:
 			tt.error("%s not found", file_name)
+		break
