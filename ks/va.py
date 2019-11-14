@@ -49,7 +49,7 @@ class va:
 
 		cur = 0
 		
-		rand_max = 20
+		rand_max = 10
 		rand = random.randint(1,rand_max)
 		rand_y = y + (rand-rand_max/2)
 		point_list.append((x, rand_y))
@@ -79,14 +79,15 @@ class va:
 		point_list[len(point_list)-1] = (target_x, rand_y)
 		for aa,bb in point_list:
 			print("ssssssssssss %u %u"%(aa,bb))
-		d.swipe_points(point_list, .9)
+		d.swipe_points(point_list, .5)
 
 
 	def fresh(self):
 		d = self.d
-		__, min_y = (d(text="向右拖动滑块填充拼图").center(offset(0,0))
+		__, min_y = d(text="向右拖动滑块填充拼图").center(offset(0,0))
 
-		for ci in d(text="captcha").child(className="android.view.View", clickable="true"):
+		for ci in d(text="captcha").child(className="android.view.View", clickable=True):
+			
 			x, y = ci.center(offset(0,0))
 
 			print("fresh x, y (%u, %u); min_y %u" %u (x, y, min_y))
