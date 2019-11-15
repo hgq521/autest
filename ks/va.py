@@ -84,11 +84,11 @@ class va:
 
 	def fresh(self):
 		d = self.d
-		__, min_y = d(text="向右拖动滑块填充拼图").center(offset(0,0))
+		__, min_y = d(text="向右拖动滑块填充拼图").center(offset=(0, 0))
 
 		for ci in d(text="captcha").child(className="android.view.View", clickable=True):
 			
-			x, y = ci.center(offset(0,0))
+			x, y = ci.center(offset=(0,0))
 
 			print("fresh x, y (%u, %u); min_y %u" %u (x, y, min_y))
 			if y >= min_y:
