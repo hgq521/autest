@@ -5,6 +5,8 @@ from opcv.valid import find_slot
 import time
 import random
 import uiautomator2 as u2
+import mytime.mytime as timeutil
+import json
 
 
 class va:
@@ -12,8 +14,8 @@ class va:
 		self.d = d
 		self.pk = pk
 		self.serl = serl
-		self.count = 0
 		self.file_name = ""
+		self.cfg = {'count':0, 'wday':timeutil.wday(time.time())}
 		pass
 
 	def take_sshot(self):
@@ -96,14 +98,25 @@ class va:
 			x, y = ci.center()
 			d.click(x, y)
 			print("fresh click x, y (%u, %u)" % (x, y))
+			break
 
 		pass
 
-	def run(self):
+	def run(self, lock):
+		cfg_name = './ks/va.json'
 		d = self.d
-		while (True):
+		self.cfg['wday'] = timeutil.wday(time.time())
+
+		with open(cfg_name, "r") as load_f:
+			load_cfg = json.load(load_f)
+			if (load_cfg['wday'] == self.cfg['wday']):
+				self.cfg['count'] = load_cfg['count']
+		
+		print(self.cfg)
+		while (self.cfg['count'] < 3):
 			if (d(text="向右拖动滑块填充拼图").wait(20.0)):
-				
+				lock.acquire()	
+				print("va lock")
 				time.sleep(1.0)
 				self.take_sshot()
 				time.sleep(2.0)
@@ -111,17 +124,24 @@ class va:
 				print("find ret start end (%u, %u, %u)"%(ret, start_x, end_x))
 				if (ret):
 					self.swip((start_x + end_x)//2)
-					self.count += 1
-					
+					self.cfg['count'] += 1
+
+					with open(cfg_name, 'w') as f:
+						json.dump(self.cfg, f)
+						
 				else:
 					self.fresh()
+					lock.realse()
+					print("continue")
 					continue
+				lock.release()
+				print("va unlock")
 
 				time.sleep(300.0)
 
 				pass
 				
-		pass
+		print("va 退出")
 
 
 if __name__ == "__main__":

@@ -15,7 +15,7 @@ class MyThread(threading.Thread):
 	def run(self):
 		print("开启线程:" + self.name)
 		#self.threadLock.acquire()
-		self.func(self.name,1.0, self.counter, self.threadLock)
+		self.func(self.threadLock)
 		#self.threadLock.release()
 
 
